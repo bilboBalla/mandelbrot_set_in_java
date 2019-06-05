@@ -1,0 +1,36 @@
+#! /bin/bash
+
+rm *.class
+rm view/*.class
+rm model/*.class
+rm control/*.class
+
+echo ""
+echo ""
+echo ""
+echo ""
+echo ""
+echo "COMPILING APP"
+echo ""
+echo ""
+echo ""
+echo ""
+echo ""
+javac App.java
+echo ""
+echo ""
+echo ""
+echo ""
+echo ""
+echo "RUNING APP"
+echo ""
+echo ""
+echo ""
+echo ""
+echo ""
+java App
+
+rm *.class
+rm view/*.class
+rm model/*.class
+rm control/*.class
