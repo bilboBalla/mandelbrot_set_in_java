@@ -1,36 +1,29 @@
 #! /bin/bash
 
-rm *.class
-rm view/*.class
-rm model/*.class
-rm control/*.class
+#rm *.class
+#rm view/*.class
+#rm model/*.class
+#rm control/*.class
 
 echo ""
-echo ""
-echo ""
-echo ""
+echo "DELETING OLD CLASS FILES"
+
+rm -f *.class 
+rm -rf */*.class
+
 echo ""
 echo "COMPILING APP"
-echo ""
-echo ""
-echo ""
-echo ""
-echo ""
 javac App.java
-echo ""
-echo ""
-echo ""
-echo ""
+
 echo ""
 echo "RUNING APP"
-echo ""
-echo ""
-echo ""
-echo ""
-echo ""
 java App
 
-rm *.class
-rm view/*.class
-rm model/*.class
-rm control/*.class
+echo ""
+echo "DELETING CLASS FILES"
+rm -f *.class 
+rm -rf */*.class
+
+echo ""
+echo "DONE"
+echo ""

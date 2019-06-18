@@ -51,6 +51,7 @@ public class MandelbrotNumber{
 		}
 	}
 
+	/*
 	@Override
 	public String toString(){
 		return (
@@ -64,4 +65,5 @@ public class MandelbrotNumber{
 			")"
 		);
 	}
+	*/
 }
