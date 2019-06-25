@@ -7,6 +7,8 @@ import java.awt.event.MouseListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.IOException;
+import javax.swing.JOptionPane;
 
 public class Control{
 
@@ -79,14 +81,22 @@ public class Control{
 	}
 
 	private void zoomButtonClicked(){
-		this.model.zReal         = Double.parseDouble(this.view.getTextFieldText("z_real"));
-		this.model.zImag         = Double.parseDouble(this.view.getTextFieldText("z_imag"));
-		this.model.magnitudeCap  = Double.parseDouble(this.view.getTextFieldText("mag_cap"));
-		this.model.iterationCap  = Integer.parseInt(this.view.getTextFieldText("itr_cap"));
-		this.model.threadCount   = Integer.parseInt(this.view.getTextFieldText("thread_count"));
-		this.model.zoomFactor    = Double.parseDouble(this.view.getTextFieldText("zoom_factor"));
-		this.model.zoomAboutReal = Double.parseDouble(this.view.getTextFieldText("zoom_about_real"));
-		this.model.zoomAboutImag = Double.parseDouble(this.view.getTextFieldText("zoom_about_imag"));
+		try{
+			this.model.zReal         = Double.parseDouble(this.view.getTextFieldText("z_real"));
+			this.model.zImag         = Double.parseDouble(this.view.getTextFieldText("z_imag"));
+			this.model.zoomFactor    = Double.parseDouble(this.view.getTextFieldText("zoom_factor"));
+			this.model.zoomAboutReal = Double.parseDouble(this.view.getTextFieldText("zoom_about_real"));
+			this.model.zoomAboutImag = Double.parseDouble(this.view.getTextFieldText("zoom_about_imag"));
+			this.model.setMagnitudeCap(Double.parseDouble(this.view.getTextFieldText("mag_cap")));
+			this.model.setIterationCap(Double.parseDouble(this.view.getTextFieldText("itr_cap")));
+			this.model.setThreadCount(Double.parseDouble(this.view.getTextFieldText("thread_count")));
+		}catch( IOException e) {
+			JOptionPane.showMessageDialog(null, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+			return;
+		}catch( NumberFormatException e){
+			JOptionPane.showMessageDialog(null, "Input Must be Numerical", "Error", JOptionPane.ERROR_MESSAGE);
+			return;
+		}
 		this.model.zoom();
 		this.model.repaint();
 		this.view.setLabelText("top", Double.toString(this.model.getTop()));
@@ -94,6 +104,5 @@ public class Control{
 		this.view.setLabelText("left", Double.toString(this.model.getLeft()));
 		this.view.setLabelText("right", Double.toString(this.model.getRight()));
 		this.view.setMandelbrotImage(this.model.getImage());
-		//this.view.repaint();
 	}
 }

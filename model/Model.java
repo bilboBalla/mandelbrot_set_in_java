@@ -3,6 +3,7 @@
 package model;
 import java.awt.image.BufferedImage;
 import java.awt.Color;
+import java.io.IOException;
 
 
 public class Model{
@@ -33,6 +34,24 @@ public class Model{
 	public double getBottom(){return this.bottom;}
 	public double getLeft(){return this.left;}
 	public double getRight(){return this.right;}
+
+	// Setters
+	public void setIterationCap(double newIterationCap) throws IOException{
+		if ( newIterationCap <= 0 || newIterationCap != Math.floor(newIterationCap)) 
+			throw new IOException("Iteration Cap Must be Integer > 0");
+		this.iterationCap = (int)newIterationCap;
+	}
+
+	public void setThreadCount(double newThreadCount) throws IOException{
+		if ( newThreadCount < 1 || newThreadCount != Math.floor(newThreadCount)) 
+			throw new IOException("Thread Count Must be Integer >= 1");
+		this.threadCount = (int)newThreadCount;
+	}
+
+	public void setMagnitudeCap(double newMagnitudeCap) throws IOException{
+		if ( newMagnitudeCap < 0) throw new IOException("Magnitude Cap Must be Integer >= 0");
+		this.magnitudeCap = newMagnitudeCap;
+	}
 
 	public double realWidth(){
 		return this.right - this.left;
@@ -104,8 +123,6 @@ public class Model{
 	}
 
 	private void generateImage(){
-		//double pixelWidth = (this.right - this.left) / (this.width-1);
-		//double pixelHeight = (this.top - this.bottom) / (this.height-1);
 		double nextImag = this.top;
 		double nextReal = this.left;
 		for ( int i = 0; i < this.height; i ++ ){
