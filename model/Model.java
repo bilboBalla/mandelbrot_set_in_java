@@ -34,6 +34,31 @@ public class Model{
 	public double getLeft(){return this.left;}
 	public double getRight(){return this.right;}
 
+	public double realWidth(){
+		return this.right - this.left;
+	}
+
+	public double imagHeight(){
+		return this.top - this.bottom;
+	}
+
+	public double pixelWidth(){
+		return this.realWidth() / (this.width-1);
+
+	}
+
+	public double pixelHeight(){
+		return this.imagHeight() / (this.height-1);
+	}
+
+	public double mapYToImag(int y){
+		return this.top - y*this.pixelHeight();
+	}
+
+	public double mapXToReal(int x){
+		return this.left + x*this.pixelWidth();
+	}
+
 	public BufferedImage getImage(){
 		return this.image;
 	}
@@ -79,8 +104,8 @@ public class Model{
 	}
 
 	private void generateImage(){
-		double pixelWidth = (this.right - this.left) / (this.width-1);
-		double pixelHeight = (this.top - this.bottom) / (this.height-1);
+		//double pixelWidth = (this.right - this.left) / (this.width-1);
+		//double pixelHeight = (this.top - this.bottom) / (this.height-1);
 		double nextImag = this.top;
 		double nextReal = this.left;
 		for ( int i = 0; i < this.height; i ++ ){
@@ -88,10 +113,10 @@ public class Model{
 				int escapeIteration = this.mandelbrotAlgorithm(nextReal, nextImag);
 				Color nextColor = this.mapColor(escapeIteration);
 				this.image.setRGB(j, i, nextColor.getRGB());
-				nextReal += pixelWidth;
+				nextReal += this.pixelWidth();
 			}
 			nextReal = this.left;
-			nextImag -= pixelHeight;
+			nextImag -= this.pixelHeight();
 		}
 	}
 

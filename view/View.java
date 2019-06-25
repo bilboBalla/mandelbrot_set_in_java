@@ -54,10 +54,10 @@ public class View extends JFrame{
 	}
 
 	public void toggleBoundsVisible(){
-		this.labels.get("top_imag").setVisible(!this.boundsAreVisible);
-		this.labels.get("bottom_imag").setVisible(!this.boundsAreVisible);
-		this.labels.get("left_real").setVisible(!this.boundsAreVisible);
-		this.labels.get("right_real").setVisible(!this.boundsAreVisible);
+		this.labels.get("top").setVisible(!this.boundsAreVisible);
+		this.labels.get("bottom").setVisible(!this.boundsAreVisible);
+		this.labels.get("left").setVisible(!this.boundsAreVisible);
+		this.labels.get("right").setVisible(!this.boundsAreVisible);
 		this.boundsAreVisible = !this.boundsAreVisible;
 	}
 
@@ -95,10 +95,10 @@ public class View extends JFrame{
 
 	private void buildLabels(){
 		this.labels = new HashMap<String,JLabel>();
-		this.labels.put("top_imag", new JLabel("1.25"));
-		this.labels.put("bottom_imag", new JLabel("-1.25"));
-		this.labels.put("left_real", new JLabel("-2.5"));
-		this.labels.put("right_real", new JLabel("1.5"));
+		this.labels.put("top", new JLabel("1.25"));
+		this.labels.put("bottom", new JLabel("-1.25"));
+		this.labels.put("left", new JLabel("-2.5"));
+		this.labels.put("right", new JLabel("1.5"));
 		this.labels.put("z_real", new JLabel("Z Real"));
 		this.labels.put("z_imag", new JLabel("Z Imag"));
 		this.labels.put("mag_cap", new JLabel("Mag. Cap"));
@@ -132,12 +132,12 @@ public class View extends JFrame{
 		manDisp.setLayout(new BorderLayout());
 		manDisp.setBorder(BorderFactory.createLineBorder(Color.BLACK));
 		manDisp.setPreferredSize(new Dimension(1000, 625));
-		manDisp.add(this.labels.get("top_imag"), BorderLayout.NORTH);
-		manDisp.add(this.labels.get("bottom_imag"), BorderLayout.SOUTH);
-		manDisp.add(this.labels.get("left_real"), BorderLayout.WEST);
-		manDisp.add(this.labels.get("right_real"), BorderLayout.EAST);
-		this.labels.get("top_imag").setHorizontalAlignment(SwingConstants.CENTER);
-		this.labels.get("bottom_imag").setHorizontalAlignment(SwingConstants.CENTER);
+		manDisp.add(this.labels.get("top"), BorderLayout.NORTH);
+		manDisp.add(this.labels.get("bottom"), BorderLayout.SOUTH);
+		manDisp.add(this.labels.get("left"), BorderLayout.WEST);
+		manDisp.add(this.labels.get("right"), BorderLayout.EAST);
+		this.labels.get("top").setHorizontalAlignment(SwingConstants.CENTER);
+		this.labels.get("bottom").setHorizontalAlignment(SwingConstants.CENTER);
 		this.mandelbrotDisplay = manDisp;
 		this.boundsAreVisible = true;
 		this.getContentPane().add(this.mandelbrotDisplay, BorderLayout.WEST);

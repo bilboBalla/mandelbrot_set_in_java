@@ -58,9 +58,12 @@ public class Control{
 	}
 
 	private void mandelbrotDisplayWasClicked(MouseEvent e){
-		System.out.println(e.getX());
-		System.out.println();
-		System.out.println(e.getY());
+		double selectedReal = this.model.mapXToReal(e.getX());
+		double selectedImag = this.model.mapYToImag(e.getY());
+		this.model.zoomAboutReal = selectedReal;
+		this.model.zoomAboutImag = selectedImag;
+		this.view.setTextFieldText("zoom_about_real", Double.toString(selectedReal));
+		this.view.setTextFieldText("zoom_about_imag", Double.toString(selectedImag));
 	}
 
 	private void saveButtonWasClicked(){
@@ -76,18 +79,6 @@ public class Control{
 	}
 
 	private void zoomButtonClicked(){
-		/*
-		private double zReal;
-		private double zImag;
-		private double magnitudeCap;
-
-		private int    iterationCap;
-		private int    threadCount;
-		private double zoomFactor;
-
-		private double zoomAboutReal;
-		private double zoomAboutImag;
-		*/
 		this.model.zReal         = Double.parseDouble(this.view.getTextFieldText("z_real"));
 		this.model.zImag         = Double.parseDouble(this.view.getTextFieldText("z_imag"));
 		this.model.magnitudeCap  = Double.parseDouble(this.view.getTextFieldText("mag_cap"));
@@ -98,7 +89,11 @@ public class Control{
 		this.model.zoomAboutImag = Double.parseDouble(this.view.getTextFieldText("zoom_about_imag"));
 		this.model.zoom();
 		this.model.repaint();
-		this.view.setLabelText("")
+		this.view.setLabelText("top", Double.toString(this.model.getTop()));
+		this.view.setLabelText("bottom", Double.toString(this.model.getBottom()));
+		this.view.setLabelText("left", Double.toString(this.model.getLeft()));
+		this.view.setLabelText("right", Double.toString(this.model.getRight()));
 		this.view.setMandelbrotImage(this.model.getImage());
+		//this.view.repaint();
 	}
 }
