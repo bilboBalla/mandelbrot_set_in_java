@@ -50,20 +50,4 @@ public class MandelbrotNumber{
 			zImagSqr = zImag * zImag;
 		}
 	}
-
-	/*
-	@Override
-	public String toString(){
-		return (
-			Double.toString(this.real) + 
-			" + " +
-			Double.toString(this.imag) +
-			"i, (M= " +
-			Double.toString(this.magnitudeAtDivergence) +
-			", D= " + 
-			Double.toString(this.iterationAtDivergence) +
-			")"
-		);
-	}
-	*/
 }

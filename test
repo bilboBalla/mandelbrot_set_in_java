@@ -13,11 +13,11 @@ rm -rf */*.class
 
 echo ""
 echo "COMPILING APP"
-javac App.java
+javac Main.java
 
 echo ""
 echo "RUNING APP"
-java App
+java Main
 
 echo ""
 echo "DELETING CLASS FILES"

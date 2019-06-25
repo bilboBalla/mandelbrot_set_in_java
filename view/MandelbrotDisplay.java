@@ -83,10 +83,10 @@ public class MandelbrotDisplay extends JPanel{
 	}
 
 	private void buildBorderLabels(){
-		this.top = new JLabel(new Double(ComplexFrame.get_instance().get_top()).toString());
+		this.top    = new JLabel(new Double(ComplexFrame.get_instance().get_top()).toString());
 		this.bottom = new JLabel(new Double(ComplexFrame.get_instance().get_bottom()).toString());
-		this.left = new JLabel(new Double(ComplexFrame.get_instance().get_left()).toString());
-		this.right = new JLabel(new Double(ComplexFrame.get_instance().get_right()).toString());
+		this.left   = new JLabel(new Double(ComplexFrame.get_instance().get_left()).toString());
+		this.right  = new JLabel(new Double(ComplexFrame.get_instance().get_right()).toString());
 	}
 
 	private static MandelbrotDisplay instance = null;
