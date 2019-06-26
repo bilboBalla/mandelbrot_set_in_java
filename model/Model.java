@@ -4,6 +4,8 @@ package model;
 import java.awt.image.BufferedImage;
 import java.awt.Color;
 import java.io.IOException;
+import java.util.Stack;
+import java.util.Vector;
 
 
 public class Model{
@@ -20,6 +22,11 @@ public class Model{
 	private double bottom;
 	private double left;
 	private double right;
+	private Stack<Vector<Double>> boundsStack;
+	private final int TOP    = 0;
+	private final int BOTTOM = 1;
+	private final int LEFT   = 2;
+	private final int RIGHT  = 3;
 	public double zoomFactor;
 	public double zoomAboutReal;
 	public double zoomAboutImag;
@@ -27,13 +34,13 @@ public class Model{
 	// Image Context
 	private int width;
 	private int height;
-	private BufferedImage image;
+	private Stack<BufferedImage> imageStack;
 
 	// Getters
-	public double getTop(){return this.top;}
-	public double getBottom(){return this.bottom;}
-	public double getLeft(){return this.left;}
-	public double getRight(){return this.right;}
+	public double getTop(){return this.boundsStack.peek().get(this.TOP);}
+	public double getBottom(){return this.boundsStack.peek().get(this.BOTTOM);}
+	public double getLeft(){return this.boundsStack.peek().get(this.LEFT);}
+	public double getRight(){return this.boundsStack.peek().get(this.RIGHT);}
 
 	// Setters
 	public void setIterationCap(double newIterationCap) throws IOException{
@@ -54,11 +61,11 @@ public class Model{
 	}
 
 	public double realWidth(){
-		return this.right - this.left;
+		return this.getRight() - this.getLeft();
 	}
 
 	public double imagHeight(){
-		return this.top - this.bottom;
+		return this.getTop() - this.getBottom();
 	}
 
 	public double pixelWidth(){
@@ -71,15 +78,15 @@ public class Model{
 	}
 
 	public double mapYToImag(int y){
-		return this.top - y*this.pixelHeight();
+		return this.getTop() - y*this.pixelHeight();
 	}
 
 	public double mapXToReal(int x){
-		return this.left + x*this.pixelWidth();
+		return this.getLeft() + x*this.pixelWidth();
 	}
 
 	public BufferedImage getImage(){
-		return this.image;
+		return this.imageStack.peek();
 	}
 
 	public void repaint(){
@@ -87,12 +94,22 @@ public class Model{
 	}
 
 	public void zoom(){
-		double w = this.right - this.left;
-		double h = this.top - this.bottom;
-		this.top = this.zoomAboutImag + zoomFactor * h/2;
-		this.bottom = this.zoomAboutImag - zoomFactor * h/2;
-		this.right = this.zoomAboutReal + zoomFactor * w/2;
-		this.left = this.zoomAboutReal - zoomFactor * w/2;
+		double w = this.getRight() - this.getLeft();
+		double h = this.getTop() - this.getBottom();
+		Vector<Double> newBounds = new Vector<Double>(4);
+		newBounds.add(this.TOP, this.zoomAboutImag + zoomFactor * h/2);
+		newBounds.add(this.BOTTOM, this.zoomAboutImag - zoomFactor * h/2);
+		newBounds.add(this.LEFT, this.zoomAboutReal - zoomFactor * w/2);
+		newBounds.add(this.RIGHT, this.zoomAboutReal + zoomFactor * w/2);
+		this.boundsStack.push(newBounds);
+		this.pushBlankImageOntoStack();
+		this.generateImage();
+	}
+
+	public void popToLastImage(){
+		if ( this.boundsStack.size() == 1) return;
+		this.boundsStack.pop();
+		this.imageStack.pop();
 	}
 
 	public Model(){
@@ -105,34 +122,43 @@ public class Model{
 		this.magnitudeCap = 100;
 		this.iterationCap = 100;
 		this.threadCount = 1;
-		this.top = 1.25;
-		this.bottom = -1.25;
-		this.left = -2.5;
-		this.right = 1.5;
+		this.boundsStack = new Stack<Vector<Double>>();
+		this.boundsStack.push(new Vector<Double>(4));
+		this.boundsStack.peek().add(this.TOP,     1.25);
+		this.boundsStack.peek().add(this.BOTTOM, -1.25);
+		this.boundsStack.peek().add(this.LEFT,   -2.5);
+		this.boundsStack.peek().add(this.RIGHT,   1.5);
 		this.zoomFactor = 1;
 		this.zoomAboutReal = 0;
 		this.zoomAboutImag = 0;
 		this.width = 1000;
 		this.height = 625;
-		this.image = new BufferedImage(
-			this.width, 
-			this.height, 
-			BufferedImage.TYPE_INT_RGB
-		);
+		this.imageStack = new Stack<BufferedImage>();
+		this.pushBlankImageOntoStack();
 		this.generateImage();
 	}
 
+	private void pushBlankImageOntoStack(){
+		this.imageStack.push(
+			new BufferedImage(
+				this.width, 
+				this.height, 
+				BufferedImage.TYPE_INT_RGB
+			)
+		);
+	}
+
 	private void generateImage(){
-		double nextImag = this.top;
-		double nextReal = this.left;
+		double nextImag = this.getTop();
+		double nextReal = this.getLeft();
 		for ( int i = 0; i < this.height; i ++ ){
 			for ( int j = 0; j < this.width; j ++ ){
 				int escapeIteration = this.mandelbrotAlgorithm(nextReal, nextImag);
 				Color nextColor = this.mapColor(escapeIteration);
-				this.image.setRGB(j, i, nextColor.getRGB());
+				this.imageStack.peek().setRGB(j, i, nextColor.getRGB());
 				nextReal += this.pixelWidth();
 			}
-			nextReal = this.left;
+			nextReal = this.getLeft();
 			nextImag -= this.pixelHeight();
 		}
 	}

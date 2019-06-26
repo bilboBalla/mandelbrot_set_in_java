@@ -73,7 +73,9 @@ public class Control{
 	}
 
 	private void backButtonWasClicked(){
-		System.out.println("back");
+		this.model.popToLastImage();
+		this.updateViewsBoundsLabels();
+		this.view.setMandelbrotImage(this.model.getImage());
 	}
 
 	private void boundsButtonClicked(){
@@ -98,11 +100,14 @@ public class Control{
 			return;
 		}
 		this.model.zoom();
-		this.model.repaint();
+		this.updateViewsBoundsLabels();
+		this.view.setMandelbrotImage(this.model.getImage());
+	}
+
+	private void updateViewsBoundsLabels(){
 		this.view.setLabelText("top", Double.toString(this.model.getTop()));
 		this.view.setLabelText("bottom", Double.toString(this.model.getBottom()));
 		this.view.setLabelText("left", Double.toString(this.model.getLeft()));
 		this.view.setLabelText("right", Double.toString(this.model.getRight()));
-		this.view.setMandelbrotImage(this.model.getImage());
 	}
 }
