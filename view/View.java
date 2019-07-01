@@ -21,6 +21,7 @@ import java.awt.event.ActionListener;
 import java.util.HashMap;
 
 public class View extends JFrame{
+	
 	private boolean boundsAreVisible;
 	private BufferedImage mandelbrotImage;
 	private JPanel mandelbrotDisplay;
@@ -107,6 +108,8 @@ public class View extends JFrame{
 		this.labels.put("zoom_factor", new JLabel("Zoom Factor"));
 		this.labels.put("zoom_about_real", new JLabel("Zoom About R"));
 		this.labels.put("zoom_about_imag", new JLabel("Zoom About I"));
+		this.labels.put("progress1", new JLabel("progress"));
+		this.labels.put("progress2", new JLabel("progress"));
 	}
 
 	private void buildTextFields(){
@@ -114,9 +117,9 @@ public class View extends JFrame{
 		this.textFields.put("z_real", new JTextField("0", 5));
 		this.textFields.put("z_imag", new JTextField("0", 5));
 		this.textFields.put("mag_cap", new JTextField("2", 5));
-		this.textFields.put("itr_cap", new JTextField("100", 5));
-		this.textFields.put("thread_count", new JTextField("1", 5));
-		this.textFields.put("zoom_factor", new JTextField("1", 5));
+		this.textFields.put("itr_cap", new JTextField("10000", 5));
+		this.textFields.put("thread_count", new JTextField("4", 5));
+		this.textFields.put("zoom_factor", new JTextField("0.5", 5));
 		this.textFields.put("zoom_about_real", new JTextField("0", 5));
 		this.textFields.put("zoom_about_imag", new JTextField("0", 5));
 	}
@@ -167,6 +170,9 @@ public class View extends JFrame{
 		contPnl.add(this.buttons.get("save"));
 		contPnl.add(this.buttons.get("bounds"));
 		contPnl.add(this.buttons.get("zoom"));
+		contPnl.add(this.labels.get("progress1"));
+		contPnl.add(this.labels.get("progress2"));
+		this.labels.get("progress1").setHorizontalAlignment(SwingConstants.CENTER);
 		this.getContentPane().add(contPnl, BorderLayout.EAST);
 	}
 }

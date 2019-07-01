@@ -8,7 +8,10 @@ import java.awt.event.MouseEvent;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
+import java.io.File;
 import javax.swing.JOptionPane;
+import javax.swing.JFileChooser;
+import javax.imageio.ImageIO;
 
 public class Control{
 
@@ -69,7 +72,17 @@ public class Control{
 	}
 
 	private void saveButtonWasClicked(){
-		System.out.println("save");
+		try{
+			JFileChooser chooser = new JFileChooser();
+			int returnVal = chooser.showSaveDialog(null);
+			if(returnVal == JFileChooser.APPROVE_OPTION) {
+	            File outFile = chooser.getSelectedFile();
+	            ImageIO.write(this.model.getImage(), "png", outFile);
+	    	}
+	    	else throw new Exception();
+	    }catch( Exception e){
+			JOptionPane.showMessageDialog(null, "Could not save file", "Error", JOptionPane.ERROR_MESSAGE);
+	    }
 	}
 
 	private void backButtonWasClicked(){

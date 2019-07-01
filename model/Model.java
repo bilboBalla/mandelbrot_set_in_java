@@ -6,6 +6,7 @@ import java.awt.Color;
 import java.io.IOException;
 import java.util.Stack;
 import java.util.Vector;
+import javax.swing.SwingWorker;
 
 
 public class Model{
@@ -60,23 +61,6 @@ public class Model{
 		this.magnitudeCap = newMagnitudeCap;
 	}
 
-	public double realWidth(){
-		return this.getRight() - this.getLeft();
-	}
-
-	public double imagHeight(){
-		return this.getTop() - this.getBottom();
-	}
-
-	public double pixelWidth(){
-		return this.realWidth() / (this.width-1);
-
-	}
-
-	public double pixelHeight(){
-		return this.imagHeight() / (this.height-1);
-	}
-
 	public double mapYToImag(int y){
 		return this.getTop() - y*this.pixelHeight();
 	}
@@ -87,10 +71,6 @@ public class Model{
 
 	public BufferedImage getImage(){
 		return this.imageStack.peek();
-	}
-
-	public void repaint(){
-		this.generateImage();
 	}
 
 	public void zoom(){
@@ -116,19 +96,36 @@ public class Model{
 		this.construct();
 	}
 
+	private double realWidth(){
+		return this.getRight() - this.getLeft();
+	}
+
+	private double imagHeight(){
+		return this.getTop() - this.getBottom();
+	}
+
+	private double pixelWidth(){
+		return this.realWidth() / (this.width-1);
+
+	}
+
+	private double pixelHeight(){
+		return this.imagHeight() / (this.height-1);
+	}
+
 	private void construct(){
 		this.zReal = 0;
 		this.zImag = 0;
 		this.magnitudeCap = 100;
-		this.iterationCap = 100;
-		this.threadCount = 1;
+		this.iterationCap = 10000;
+		this.threadCount = 4;
 		this.boundsStack = new Stack<Vector<Double>>();
 		this.boundsStack.push(new Vector<Double>(4));
 		this.boundsStack.peek().add(this.TOP,     1.25);
 		this.boundsStack.peek().add(this.BOTTOM, -1.25);
 		this.boundsStack.peek().add(this.LEFT,   -2.5);
 		this.boundsStack.peek().add(this.RIGHT,   1.5);
-		this.zoomFactor = 1;
+		this.zoomFactor = 0.5;
 		this.zoomAboutReal = 0;
 		this.zoomAboutImag = 0;
 		this.width = 1000;
@@ -149,23 +146,63 @@ public class Model{
 	}
 
 	private void generateImage(){
+		long startTime = System.nanoTime();
+
+		Vector<Thread> threads = new Vector<Thread>(this.threadCount);
+		final int xRangePerThread = this.width/this.threadCount;
+		int nextStartingX = 0;
+		for ( int i = 0; i < this.threadCount; ++ i ){
+			final int nextStartingXFinal = nextStartingX;
+			Thread nextThread = new Thread(new Runnable(){
+				@Override public void run(){
+					Model.this.generatePartialImage(
+						nextStartingXFinal
+						, nextStartingXFinal + xRangePerThread
+					);
+				}
+			});
+			nextStartingX = nextStartingX + xRangePerThread;
+			threads.add(nextThread);
+		}
+		if ( (this.width % this.threadCount) != 0 ){
+			System.out.println("there was a remainder");
+			final int startX = this.width - (this.width%this.threadCount);
+			final int endX = this.width;
+			threads.add(new Thread(new Runnable(){
+				@Override public void run(){
+					Model.this.generatePartialImage(startX, endX);
+				}
+			}));
+		}
+		for ( Thread thread : threads ) thread.start();
+		try{
+			for ( Thread thread : threads ) thread.join();
+		}catch ( InterruptedException e ){}
+
+		long endTime = System.nanoTime();
+		double total = (double)(endTime - startTime)/1000000000;
+		System.out.println(total);
+	}
+
+	private void generatePartialImage(int startX, int endX){
+		System.out.println("indeed, execution is here");
 		double nextImag = this.getTop();
-		double nextReal = this.getLeft();
+		double nextReal = this.mapXToReal(startX);
 		for ( int i = 0; i < this.height; i ++ ){
-			for ( int j = 0; j < this.width; j ++ ){
+			for ( int j = startX; j < endX; j ++ ){
 				int escapeIteration = this.mandelbrotAlgorithm(nextReal, nextImag);
 				Color nextColor = this.mapColor(escapeIteration);
 				this.imageStack.peek().setRGB(j, i, nextColor.getRGB());
 				nextReal += this.pixelWidth();
 			}
-			nextReal = this.getLeft();
+			nextReal = this.mapXToReal(startX);
 			nextImag -= this.pixelHeight();
 		}
 	}
 
 	private Color mapColor(int escapeIteration){
 		if (escapeIteration == this.iterationCap)
-			return Color.BLACK;
+			return Color.RED;
 		return Color.WHITE;
 	}
 
@@ -178,7 +215,6 @@ public class Model{
 		
 		for (int i = 0; true; i ++){
 			if ( (zRealSqr + zImagSqr) >= magCapSqr || i == this.iterationCap){
-				//System.out.println(i);
 				return i;
 			}
 			zI = 2 * zR * zI + imag;
