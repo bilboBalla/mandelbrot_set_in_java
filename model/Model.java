@@ -1,15 +1,20 @@
 // Model.java
 
 package model;
+import view.*;
 import java.awt.image.BufferedImage;
 import java.awt.Color;
 import java.io.IOException;
 import java.util.Stack;
 import java.util.Vector;
+import java.util.List;
 import javax.swing.SwingWorker;
+import java.awt.Graphics;
 
 
 public class Model{
+
+	public View view;
 
 	// Algorithm Context
 	public double zReal;
@@ -17,6 +22,7 @@ public class Model{
 	public double magnitudeCap;
 	public int    iterationCap;
 	public int    threadCount;
+	public Vector<Thread> threads;
 
 	// Zoom Context
 	private double top;
@@ -53,6 +59,8 @@ public class Model{
 	public void setThreadCount(double newThreadCount) throws IOException{
 		if ( newThreadCount < 1 || newThreadCount != Math.floor(newThreadCount)) 
 			throw new IOException("Thread Count Must be Integer >= 1");
+		if ( newThreadCount > this.width )
+			throw new IOException("Thread Count Must not exceed width in pixels of image");
 		this.threadCount = (int)newThreadCount;
 	}
 
@@ -73,26 +81,61 @@ public class Model{
 		return this.imageStack.peek();
 	}
 
+	public boolean isWorking(){
+		for ( Thread thread : this.threads )
+			if ( thread.isAlive() )
+				return true;
+			return false;
+	}
+
+	public int numberOfThreadsWorking(){
+		int count = 0;
+		for ( Thread thread : this.threads )
+			if ( thread.isAlive() )
+				count++;
+		return count;
+	}
+
 	public void zoom(){
-		double w = this.getRight() - this.getLeft();
-		double h = this.getTop() - this.getBottom();
-		Vector<Double> newBounds = new Vector<Double>(4);
-		newBounds.add(this.TOP, this.zoomAboutImag + zoomFactor * h/2);
-		newBounds.add(this.BOTTOM, this.zoomAboutImag - zoomFactor * h/2);
-		newBounds.add(this.LEFT, this.zoomAboutReal - zoomFactor * w/2);
-		newBounds.add(this.RIGHT, this.zoomAboutReal + zoomFactor * w/2);
-		this.boundsStack.push(newBounds);
-		this.pushBlankImageOntoStack();
-		this.generateImage();
+		this.pushToNextImage(
+			this.zoomAboutImag + zoomFactor * this.imagHeight()/2,
+			this.zoomAboutImag - zoomFactor * this.imagHeight()/2,
+			this.zoomAboutReal - zoomFactor * this.realWidth()/2,
+			this.zoomAboutReal + zoomFactor * this.realWidth()/2
+		);
 	}
 
 	public void popToLastImage(){
-		if ( this.boundsStack.size() == 1) return;
+		if ( this.boundsStack.size() <= 1) return;
+		if ( this.imageStack.size() <= 1) return;
 		this.boundsStack.pop();
 		this.imageStack.pop();
 	}
 
-	public Model(){
+	public void pushToNextImage(double top, double bottom, double left, double right){
+		if ( this.imageStack == null )
+			this.imageStack = new Stack<BufferedImage>();
+		if ( this.boundsStack == null )
+			this.boundsStack = new Stack<Vector<Double>>();
+		this.imageStack.push(new BufferedImage(this.width, this.height, BufferedImage.TYPE_INT_RGB));
+		this.boundsStack.push(new Vector<Double>(4));
+		this.boundsStack.peek().add(this.TOP, top);
+		this.boundsStack.peek().add(this.BOTTOM, bottom);
+		this.boundsStack.peek().add(this.LEFT, left);
+		this.boundsStack.peek().add(this.RIGHT, right);
+		this.generateImage();
+	}
+
+	public BufferedImage copyImage(BufferedImage source){
+	    BufferedImage b = new BufferedImage(source.getWidth(), source.getHeight(), source.getType());
+	    Graphics g = b.getGraphics();
+	    g.drawImage(source, 0, 0, null);
+	    g.dispose();
+	    return b;
+	}
+
+	public Model(View view){
+		this.view = view;
 		this.construct();
 	}
 
@@ -118,74 +161,94 @@ public class Model{
 		this.zImag = 0;
 		this.magnitudeCap = 100;
 		this.iterationCap = 10000;
-		this.threadCount = 4;
-		this.boundsStack = new Stack<Vector<Double>>();
-		this.boundsStack.push(new Vector<Double>(4));
-		this.boundsStack.peek().add(this.TOP,     1.25);
-		this.boundsStack.peek().add(this.BOTTOM, -1.25);
-		this.boundsStack.peek().add(this.LEFT,   -2.5);
-		this.boundsStack.peek().add(this.RIGHT,   1.5);
+		this.threadCount = 100;
 		this.zoomFactor = 0.5;
 		this.zoomAboutReal = 0;
 		this.zoomAboutImag = 0;
 		this.width = 1000;
 		this.height = 625;
-		this.imageStack = new Stack<BufferedImage>();
-		this.pushBlankImageOntoStack();
-		this.generateImage();
-	}
-
-	private void pushBlankImageOntoStack(){
-		this.imageStack.push(
-			new BufferedImage(
-				this.width, 
-				this.height, 
-				BufferedImage.TYPE_INT_RGB
-			)
-		);
+		this.pushToNextImage(1.25, -1.25, -2.5, 1.5);
 	}
 
 	private void generateImage(){
-		long startTime = System.nanoTime();
-
-		Vector<Thread> threads = new Vector<Thread>(this.threadCount);
-		final int xRangePerThread = this.width/this.threadCount;
-		int nextStartingX = 0;
-		for ( int i = 0; i < this.threadCount; ++ i ){
-			final int nextStartingXFinal = nextStartingX;
-			Thread nextThread = new Thread(new Runnable(){
-				@Override public void run(){
-					Model.this.generatePartialImage(
-						nextStartingXFinal
-						, nextStartingXFinal + xRangePerThread
+		SwingWorker<Integer, Integer> worker = new SwingWorker<Integer, Integer>(){
+			@Override protected Integer doInBackground(){
+				Model.this.threads = new Vector<Thread>(Model.this.threadCount);
+				int xRangePerThread = Model.this.width/Model.this.threadCount;
+				int nextStartingX = 0;
+				for ( int i = 0; i < Model.this.threadCount; ++ i ){
+					Model.this.threads.add(Model.this.setUpThread(nextStartingX, nextStartingX + xRangePerThread));
+					nextStartingX = nextStartingX + xRangePerThread;
+				}
+				if ( (Model.this.width % Model.this.threadCount) != 0 ){
+					Model.this.threads.add(
+						Model.this.setUpThread(
+							Model.this.width - (Model.this.width%Model.this.threadCount), 
+							Model.this.width
+						)
 					);
 				}
-			});
-			nextStartingX = nextStartingX + xRangePerThread;
-			threads.add(nextThread);
-		}
-		if ( (this.width % this.threadCount) != 0 ){
-			System.out.println("there was a remainder");
-			final int startX = this.width - (this.width%this.threadCount);
-			final int endX = this.width;
-			threads.add(new Thread(new Runnable(){
-				@Override public void run(){
-					Model.this.generatePartialImage(startX, endX);
-				}
-			}));
-		}
-		for ( Thread thread : threads ) thread.start();
-		try{
-			for ( Thread thread : threads ) thread.join();
-		}catch ( InterruptedException e ){}
+				for ( Thread thread : Model.this.threads ) thread.start();
+				try{
+					for ( Thread thread : Model.this.threads ) {
+						thread.join();
+						publish(Model.this.numberOfThreadsWorking());
+					}
+				}catch ( InterruptedException e ){}
+				return 0;
+			}
 
-		long endTime = System.nanoTime();
-		double total = (double)(endTime - startTime)/1000000000;
-		System.out.println(total);
+			@Override protected void process(List<Integer> chunks){
+				int latestChunk = chunks.get(chunks.size()-1);
+				Model.this.view.setLabelText("progress2", Integer.toString(latestChunk));
+				
+			}
+
+			@Override protected void done(){
+				Model.this.view.repaintMandelbrotDisplay();
+			}
+			
+		};
+		worker.execute();
+	}
+
+	private void generateImageInOneThread(){
+		SwingWorker<Integer,Integer> worker = new SwingWorker<Integer, Integer>(){
+			@Override protected Integer doInBackground(){
+				double nextImag = Model.this.getTop();
+				double nextReal = Model.this.getLeft();
+				for ( int i = 0; i < Model.this.height; i ++ ){
+					for ( int j = 0; j < Model.this.width; j ++ ){
+						int escapeIteration = Model.this.mandelbrotAlgorithm(nextReal, nextImag);
+						Color nextColor = Model.this.mapColor(escapeIteration);
+						Model.this.imageStack.peek().setRGB(j, i, nextColor.getRGB());
+						nextReal += Model.this.pixelWidth();
+						publish((i+1)*(j+1));
+					}
+					nextReal = Model.this.getLeft();
+					nextImag -= Model.this.pixelHeight();
+				}
+				return 0;
+			}
+
+			@Override protected void process(List<Integer> chunks){
+				int latestChunk = chunks.get(chunks.size()-1);
+				Model.this.view.setLabelText("progress2", Integer.toString(latestChunk));
+				Model.this.view.repaintMandelbrotDisplay();
+			}
+		};
+		worker.execute();
+	}
+
+	private Thread setUpThread(int startX, int endX){
+		return new Thread(new Runnable(){
+			@Override public void run(){
+				generatePartialImage(startX, endX);
+			}
+		});
 	}
 
 	private void generatePartialImage(int startX, int endX){
-		System.out.println("indeed, execution is here");
 		double nextImag = this.getTop();
 		double nextReal = this.mapXToReal(startX);
 		for ( int i = 0; i < this.height; i ++ ){

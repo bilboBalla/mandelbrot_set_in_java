@@ -18,6 +18,10 @@ import java.awt.GridLayout;
 import java.awt.Color;
 import java.awt.event.MouseListener;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyListener;
+import java.awt.event.WindowFocusListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.util.HashMap;
 
 public class View extends JFrame{
@@ -28,6 +32,7 @@ public class View extends JFrame{
 	private HashMap<String, JLabel> labels;
 	private HashMap<String, JButton> buttons;
 	private HashMap<String, JTextField> textFields;
+	private int textFieldLength = 5;
 
 	public void addMouseListenerToMandelbrotDisplay(MouseListener listener){
 		this.mandelbrotDisplay.addMouseListener(listener);
@@ -40,6 +45,11 @@ public class View extends JFrame{
 
 	public void addActionToButton(String button, ActionListener listener){
 		this.buttons.get(button).addActionListener(listener);
+	}
+
+	@Override
+	public void addKeyListener(KeyListener listener){
+		this.mandelbrotDisplay.addKeyListener(listener);
 	}
 
 	public void setTextFieldText(String textField, String text){
@@ -62,6 +72,14 @@ public class View extends JFrame{
 		this.boundsAreVisible = !this.boundsAreVisible;
 	}
 
+	public void repaintMandelbrotDisplay(){
+		this.mandelbrotDisplay.repaint();
+	}
+
+	public void reFocusToMandelbrotDisplay(){
+		this.mandelbrotDisplay.requestFocusInWindow();
+	}
+
 
 	public View(){
 		super();
@@ -78,6 +96,11 @@ public class View extends JFrame{
 		this.pack();
 		this.setVisible(true);
 		this.setResizable(false);
+		this.addWindowFocusListener(new WindowAdapter() {
+		    public void windowGainedFocus(WindowEvent e) {
+		        View.this.reFocusToMandelbrotDisplay();
+		    }
+		});
 	}
 
 	private void buildHashMaps(){
@@ -114,14 +137,14 @@ public class View extends JFrame{
 
 	private void buildTextFields(){
 		this.textFields = new HashMap<String, JTextField>();
-		this.textFields.put("z_real", new JTextField("0", 5));
-		this.textFields.put("z_imag", new JTextField("0", 5));
-		this.textFields.put("mag_cap", new JTextField("2", 5));
-		this.textFields.put("itr_cap", new JTextField("10000", 5));
-		this.textFields.put("thread_count", new JTextField("4", 5));
-		this.textFields.put("zoom_factor", new JTextField("0.5", 5));
-		this.textFields.put("zoom_about_real", new JTextField("0", 5));
-		this.textFields.put("zoom_about_imag", new JTextField("0", 5));
+		this.textFields.put("z_real", new JTextField(this.textFieldLength));
+		this.textFields.put("z_imag", new JTextField(this.textFieldLength));
+		this.textFields.put("mag_cap", new JTextField(this.textFieldLength));
+		this.textFields.put("itr_cap", new JTextField(this.textFieldLength));
+		this.textFields.put("thread_count", new JTextField(this.textFieldLength));
+		this.textFields.put("zoom_factor", new JTextField(this.textFieldLength));
+		this.textFields.put("zoom_about_real", new JTextField(this.textFieldLength));
+		this.textFields.put("zoom_about_imag", new JTextField(this.textFieldLength));
 	}
 
 	private void buildMandelbrotDisplay(){

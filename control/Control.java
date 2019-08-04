@@ -3,15 +3,21 @@
 package control;
 import view.*;
 import model.*;
+import java.util.List;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyListener;
+import java.awt.event.KeyEvent;
 import java.io.IOException;
 import java.io.File;
 import javax.swing.JOptionPane;
 import javax.swing.JFileChooser;
 import javax.imageio.ImageIO;
+import javax.swing.SwingWorker;
+import javax.swing.SwingUtilities;
+
 
 public class Control{
 
@@ -24,8 +30,8 @@ public class Control{
 
 	private void construct(){
 		this.view = new View();
-		this.model = new Model();
-		this.view.setMandelbrotImage(this.model.getImage());
+		this.model = new Model(this.view);
+		this.updateView();
 		this.addEventHandlers();
 	}
 
@@ -60,15 +66,24 @@ public class Control{
 				Control.this.backButtonWasClicked();
 			}
 		});
+		this.view.addKeyListener(new KeyListener(){
+			@Override public void keyTyped(KeyEvent e){}
+			@Override public void keyPressed(KeyEvent e){}
+			@Override public void keyReleased(KeyEvent e){
+				if ( e.getKeyCode() == KeyEvent.VK_ENTER )
+					Control.this.zoomButtonClicked();
+			}
+		});
 	}
 
 	private void mandelbrotDisplayWasClicked(MouseEvent e){
+		this.view.reFocusToMandelbrotDisplay();
 		double selectedReal = this.model.mapXToReal(e.getX());
 		double selectedImag = this.model.mapYToImag(e.getY());
-		this.model.zoomAboutReal = selectedReal;
-		this.model.zoomAboutImag = selectedImag;
 		this.view.setTextFieldText("zoom_about_real", Double.toString(selectedReal));
 		this.view.setTextFieldText("zoom_about_imag", Double.toString(selectedImag));
+		this.model.zoomAboutReal = selectedReal;
+		this.model.zoomAboutImag = selectedImag;
 	}
 
 	private void saveButtonWasClicked(){
@@ -80,15 +95,12 @@ public class Control{
 	            ImageIO.write(this.model.getImage(), "png", outFile);
 	    	}
 	    	else throw new Exception();
-	    }catch( Exception e){
-			JOptionPane.showMessageDialog(null, "Could not save file", "Error", JOptionPane.ERROR_MESSAGE);
-	    }
+	    }catch( Exception e){}
 	}
 
 	private void backButtonWasClicked(){
 		this.model.popToLastImage();
-		this.updateViewsBoundsLabels();
-		this.view.setMandelbrotImage(this.model.getImage());
+		this.updateView();
 	}
 
 	private void boundsButtonClicked(){
@@ -96,6 +108,12 @@ public class Control{
 	}
 
 	private void zoomButtonClicked(){
+		if ( ! this.updateModel() ) return;
+		this.model.zoom();
+		this.updateView();
+	}
+
+	private boolean updateModel(){
 		try{
 			this.model.zReal         = Double.parseDouble(this.view.getTextFieldText("z_real"));
 			this.model.zImag         = Double.parseDouble(this.view.getTextFieldText("z_imag"));
@@ -107,20 +125,28 @@ public class Control{
 			this.model.setThreadCount(Double.parseDouble(this.view.getTextFieldText("thread_count")));
 		}catch( IOException e) {
 			JOptionPane.showMessageDialog(null, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-			return;
+			return false;
 		}catch( NumberFormatException e){
 			JOptionPane.showMessageDialog(null, "Input Must be Numerical", "Error", JOptionPane.ERROR_MESSAGE);
-			return;
+			return false;
 		}
-		this.model.zoom();
-		this.updateViewsBoundsLabels();
-		this.view.setMandelbrotImage(this.model.getImage());
+		return true;
 	}
 
-	private void updateViewsBoundsLabels(){
+	private boolean updateView(){
+		this.view.setTextFieldText("z_real", Double.toString(this.model.zReal));
+		this.view.setTextFieldText("z_imag", Double.toString(this.model.zImag));
+		this.view.setTextFieldText("mag_cap", Double.toString(this.model.magnitudeCap));
+		this.view.setTextFieldText("itr_cap", Integer.toString(this.model.iterationCap));
+		this.view.setTextFieldText("thread_count", Integer.toString(this.model.threadCount));
+		this.view.setTextFieldText("zoom_about_real", Double.toString(this.model.zoomAboutReal));
+		this.view.setTextFieldText("zoom_about_imag", Double.toString(this.model.zoomAboutImag));
+		this.view.setTextFieldText("zoom_factor", Double.toString(this.model.zoomFactor));
 		this.view.setLabelText("top", Double.toString(this.model.getTop()));
 		this.view.setLabelText("bottom", Double.toString(this.model.getBottom()));
 		this.view.setLabelText("left", Double.toString(this.model.getLeft()));
 		this.view.setLabelText("right", Double.toString(this.model.getRight()));
+		this.view.setMandelbrotImage(this.model.getImage());
+		return true;
 	}
 }
