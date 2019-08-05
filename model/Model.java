@@ -22,6 +22,7 @@ public class Model{
 	public double magnitudeCap;
 	public int    iterationCap;
 	public int    threadCount;
+	public int    VthreadCount;
 	public Vector<Thread> threads;
 
 	// Zoom Context
@@ -161,7 +162,8 @@ public class Model{
 		this.zImag = 0;
 		this.magnitudeCap = 100;
 		this.iterationCap = 10000;
-		this.threadCount = 100;
+		this.threadCount = 10;
+		this.VthreadCount = 10;
 		this.zoomFactor = 0.5;
 		this.zoomAboutReal = 0;
 		this.zoomAboutImag = 0;
@@ -173,18 +175,36 @@ public class Model{
 	private void generateImage(){
 		SwingWorker<Integer, Integer> worker = new SwingWorker<Integer, Integer>(){
 			@Override protected Integer doInBackground(){
-				Model.this.threads = new Vector<Thread>(Model.this.threadCount);
+				Model.this.threads = new Vector<Thread>(Model.this.threadCount*Model.this.VthreadCount);
 				int xRangePerThread = Model.this.width/Model.this.threadCount;
+				int yRangePerThread = Model.this.height/Model.this.VthreadCount;
 				int nextStartingX = 0;
-				for ( int i = 0; i < Model.this.threadCount; ++ i ){
-					Model.this.threads.add(Model.this.setUpThread(nextStartingX, nextStartingX + xRangePerThread));
-					nextStartingX = nextStartingX + xRangePerThread;
+				int nextStartingY = 0;
+				for ( int i = 0; i < Model.this.VthreadCount; ++ i){
+					int nextEndingY = nextStartingY + yRangePerThread;
+					for ( int j = 0; j < Model.this.threadCount; ++ j ){
+						int nextEndingX = nextStartingX + xRangePerThread;
+						Model.this.threads.add(Model.this.setUpThread(
+							nextStartingX, 
+							nextEndingX, 
+							nextStartingY, 
+							nextEndingY
+						));
+						nextStartingX = nextEndingX;
+					}
+					nextStartingY = nextEndingY;
 				}
+				//for ( int i = 0; i < Model.this.threadCount; ++ i ){
+					//Model.this.threads.add(Model.this.setUpThread(nextStartingX, nextStartingX + xRangePerThread));
+					//nextStartingX = nextStartingX + xRangePerThread;
+				//}
 				if ( (Model.this.width % Model.this.threadCount) != 0 ){
 					Model.this.threads.add(
 						Model.this.setUpThread(
 							Model.this.width - (Model.this.width%Model.this.threadCount), 
-							Model.this.width
+							Model.this.width,
+							0,
+							Model.this.height
 						)
 					);
 				}
@@ -240,18 +260,18 @@ public class Model{
 		worker.execute();
 	}
 
-	private Thread setUpThread(int startX, int endX){
+	private Thread setUpThread(int startX, int endX, int startY, int endY){
 		return new Thread(new Runnable(){
 			@Override public void run(){
-				generatePartialImage(startX, endX);
+				generatePartialImage(startX, endX, startY, endY);
 			}
 		});
 	}
 
-	private void generatePartialImage(int startX, int endX){
+	private void generatePartialImage(int startX, int endX, int startY, int endY){
 		double nextImag = this.getTop();
 		double nextReal = this.mapXToReal(startX);
-		for ( int i = 0; i < this.height; i ++ ){
+		for ( int i = startY; i < endY; i ++ ){
 			for ( int j = startX; j < endX; j ++ ){
 				int escapeIteration = this.mandelbrotAlgorithm(nextReal, nextImag);
 				Color nextColor = this.mapColor(escapeIteration);
