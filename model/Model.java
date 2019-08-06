@@ -188,20 +188,30 @@ public class Model{
 						)
 					);
 				}
-				for ( Thread thread : Model.this.threads ) thread.start();
+				for ( Thread thread : Model.this.threads ) {
+					thread.start();
+					publish(Model.this.numberOfThreadsWorking());
+				}
+				while(Model.this.isWorking()) publish(Model.this.numberOfThreadsWorking());
+				/*
+				while (Model.this.numberOfThreadsWorking() == Model.this.threads.size()){
+					publish(Model.this.numberOfThreadsWorking());34
+				}
 				try{
 					for ( Thread thread : Model.this.threads ) {
+						publish(Model.this.numberOfThreadsWorking());
 						thread.join();
 						publish(Model.this.numberOfThreadsWorking());
 					}
 				}catch ( InterruptedException e ){}
+				*/
 				return 0;
 			}
 
 			@Override protected void process(List<Integer> chunks){
 				int latestChunk = chunks.get(chunks.size()-1);
 				Model.this.view.setLabelText("progress2", Integer.toString(latestChunk));
-				
+				Model.this.view.repaintMandelbrotDisplay();
 			}
 
 			@Override protected void done(){
@@ -212,6 +222,7 @@ public class Model{
 		worker.execute();
 	}
 
+	/*
 	private void generateImageInOneThread(){
 		SwingWorker<Integer,Integer> worker = new SwingWorker<Integer, Integer>(){
 			@Override protected Integer doInBackground(){
@@ -239,6 +250,7 @@ public class Model{
 		};
 		worker.execute();
 	}
+	*/
 
 	private Thread setUpThread(int startX, int endX){
 		return new Thread(new Runnable(){
@@ -264,9 +276,16 @@ public class Model{
 	}
 
 	private Color mapColor(int escapeIteration){
-		if (escapeIteration == this.iterationCap)
-			return Color.RED;
-		return Color.WHITE;
+		int hue = 360*escapeIteration / this.iterationCap;
+		int sat = 255;
+		int value;
+		if ( escapeIteration < this.iterationCap ) {
+			value = 255;
+		}
+		else{
+			value = 0;
+		}
+		return new Color(Color.HSBtoRGB(hue, sat, value));
 	}
 
 	private int mandelbrotAlgorithm(double real, double imag){

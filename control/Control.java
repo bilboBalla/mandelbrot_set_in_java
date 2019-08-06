@@ -108,6 +108,7 @@ public class Control{
 	}
 
 	private void zoomButtonClicked(){
+		if ( this.model.isWorking() ) return;
 		if ( ! this.updateModel() ) return;
 		this.model.zoom();
 		this.updateView();
