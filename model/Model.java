@@ -22,6 +22,7 @@ public class Model{
 	public double magnitudeCap;
 	public int    iterationCap;
 	public int    threadCount;
+	public int    numberOfChunks;
 	public Vector<Thread> threads;
 
 	// Zoom Context
@@ -159,9 +160,10 @@ public class Model{
 	private void construct(){
 		this.zReal = 0;
 		this.zImag = 0;
-		this.magnitudeCap = 100;
+		this.magnitudeCap = 2;
 		this.iterationCap = 10000;
 		this.threadCount = 100;
+		this.numberOfChunks = 650000;
 		this.zoomFactor = 0.5;
 		this.zoomAboutReal = 0;
 		this.zoomAboutImag = 0;
@@ -170,6 +172,7 @@ public class Model{
 		this.pushToNextImage(1.25, -1.25, -2.5, 1.5);
 	}
 
+
 	private void generateImage(){
 		SwingWorker<Integer, Integer> worker = new SwingWorker<Integer, Integer>(){
 			@Override protected Integer doInBackground(){
@@ -177,34 +180,25 @@ public class Model{
 				int xRangePerThread = Model.this.width/Model.this.threadCount;
 				int nextStartingX = 0;
 				for ( int i = 0; i < Model.this.threadCount; ++ i ){
-					Model.this.threads.add(Model.this.setUpThread(nextStartingX, nextStartingX + xRangePerThread));
+					//Model.this.threads.add(Model.this.setUpThread(nextStartingX, nextStartingX + xRangePerThread));
+					Chunk nextChunk = new Chunk(nextStartingX, nextStartingX + xRangePerThread, 0, Model.this.height);
+					Model.this.threads.add(Model.this.setUpThread(nextChunk));
 					nextStartingX = nextStartingX + xRangePerThread;
 				}
 				if ( (Model.this.width % Model.this.threadCount) != 0 ){
-					Model.this.threads.add(
-						Model.this.setUpThread(
-							Model.this.width - (Model.this.width%Model.this.threadCount), 
-							Model.this.width
-						)
+					Chunk leftOverChunk = new Chunk(
+						Model.this.width - (Model.this.width%Model.this.threadCount), 
+						Model.this.width, 
+						0,
+						Model.this.height
 					);
+					Model.this.threads.add(Model.this.setUpThread(leftOverChunk));
 				}
 				for ( Thread thread : Model.this.threads ) {
 					thread.start();
 					publish(Model.this.numberOfThreadsWorking());
 				}
 				while(Model.this.isWorking()) publish(Model.this.numberOfThreadsWorking());
-				/*
-				while (Model.this.numberOfThreadsWorking() == Model.this.threads.size()){
-					publish(Model.this.numberOfThreadsWorking());34
-				}
-				try{
-					for ( Thread thread : Model.this.threads ) {
-						publish(Model.this.numberOfThreadsWorking());
-						thread.join();
-						publish(Model.this.numberOfThreadsWorking());
-					}
-				}catch ( InterruptedException e ){}
-				*/
 				return 0;
 			}
 
@@ -221,6 +215,114 @@ public class Model{
 		};
 		worker.execute();
 	}
+
+
+	private class Chunk{
+		public int startX;
+		public int endX;
+		public int startY;
+		public int endY;
+		public boolean isComputed;
+
+		public Chunk(int startX, int endX, int startY, int endY){
+			this.startX = startX;
+			this.endX = endX;
+			this.startY = startY;
+			this.endY = endY;
+			this.isComputed = false;
+		}
+	}
+
+	private class ChunkDispatcher{
+		private Vector<Chunk> chunks;
+		public int nextChunk;
+
+		public ChunkDispatcher(int width, int height, int numberOfChunks){
+			this.nextChunk = 0;
+			this.buildChunks(width, height, numberOfChunks);
+		}
+
+		public void buildChunks(int width, int height, int numberOfChunks){
+			this.chunks = new Vector<Chunk>(numberOfChunks);
+			int numberOfChunksSquareRoot = (int)Math.sqrt(numberOfChunks);
+			int widthOfChunk = width / numberOfChunksSquareRoot;
+			int heightOfChunk = height / numberOfChunksSquareRoot;
+			int nextStartX = 0;
+			int nextStartY = 0;
+			while ( true ){
+				Chunk nextChunk;
+				int nextEndY = nextStartY + heightOfChunk;
+				while ( true ){
+					int nextEndX = nextStartX + widthOfChunk;
+					nextChunk = new Chunk(nextStartX, nextEndX, nextStartY, nextEndY);
+					this.chunks.add(nextChunk);
+					nextStartX = nextEndX;
+					if ( nextEndX >= width ){
+						nextChunk.endX = width;
+						break;
+					}
+				}
+				nextStartX = 0;
+				nextStartY = nextEndY;
+				if ( nextEndY >= height ){
+					nextChunk.endY = height;
+					break;
+				}
+			}
+			System.out.println("number of chunks");
+			System.out.println(this.chunks.size());
+		}
+
+		public synchronized Chunk dispatchNextChunk(){
+			return this.chunks.get(this.nextChunk++);
+		}
+
+		public boolean thereAreUncomputedChunks(){
+			return this.nextChunk != this.chunks.size();
+		}
+	}
+
+	private Thread makeChunkWorker(ChunkDispatcher dispatcher){
+		return new Thread(new Runnable(){
+			@Override public void run(){
+				while ( dispatcher.thereAreUncomputedChunks() )
+					generatePartialImage(dispatcher.dispatchNextChunk());
+			}
+		});
+	}
+
+/*
+	private void generateImage(){
+		SwingWorker<Integer, Integer> worker = new SwingWorker<Integer, Integer>(){
+			@Override protected Integer doInBackground(){
+				ChunkDispatcher dispatcher = new ChunkDispatcher(
+					Model.this.width, 
+					Model.this.height, 
+					Model.this.numberOfChunks
+				);
+				Model.this.threads = new Vector<Thread>(Model.this.threadCount);
+				for ( int i = 0; i < Model.this.threadCount; ++ i)
+					Model.this.threads.add(Model.this.makeChunkWorker(dispatcher));
+				for ( Thread thread : Model.this.threads )
+					thread.start();
+				while ( Model.this.isWorking() )
+					publish(dispatcher.nextChunk);
+				return 0;
+			}
+
+			@Override protected void process(List<Integer> chunks){
+				int latestChunk = chunks.get(chunks.size()-1);
+				Model.this.view.setLabelText("progress2", Integer.toString(latestChunk));
+				Model.this.view.repaintMandelbrotDisplay();
+			}
+
+			@Override protected void done(){
+				Model.this.view.repaintMandelbrotDisplay();
+			}
+		};
+		worker.execute();
+	}
+/*
 
 	/*
 	private void generateImageInOneThread(){
@@ -252,43 +354,43 @@ public class Model{
 	}
 	*/
 
-	private Thread setUpThread(int startX, int endX){
+
+	private Thread setUpThread(Chunk chunk){
 		return new Thread(new Runnable(){
 			@Override public void run(){
-				generatePartialImage(startX, endX);
+				generatePartialImage(chunk);
 			}
 		});
 	}
 
-	private void generatePartialImage(int startX, int endX){
-		double nextImag = this.getTop();
-		double nextReal = this.mapXToReal(startX);
-		for ( int i = 0; i < this.height; i ++ ){
-			for ( int j = startX; j < endX; j ++ ){
-				int escapeIteration = this.mandelbrotAlgorithm(nextReal, nextImag);
-				Color nextColor = this.mapColor(escapeIteration);
+
+	private void generatePartialImage(Chunk chunk){
+		double nextImag = this.mapYToImag(chunk.startY);
+		double nextReal = this.mapXToReal(chunk.startX);
+		for ( int i = chunk.startY; i < chunk.endY; i ++ ){
+			for ( int j = chunk.startX; j < chunk.endX; j ++ ){
+				Color nextColor = this.mandelbrotAlgorithm(nextReal, nextImag);
 				this.imageStack.peek().setRGB(j, i, nextColor.getRGB());
 				nextReal += this.pixelWidth();
 			}
-			nextReal = this.mapXToReal(startX);
+			nextReal = this.mapXToReal(chunk.startX);
 			nextImag -= this.pixelHeight();
 		}
 	}
 
-	private Color mapColor(int escapeIteration){
-		int hue = 360*escapeIteration / this.iterationCap;
-		int sat = 255;
-		int value;
-		if ( escapeIteration < this.iterationCap ) {
-			value = 255;
-		}
-		else{
-			value = 0;
-		}
-		return new Color(Color.HSBtoRGB(hue, sat, value));
+	private double logBase2(double number){
+		return Math.log(number)/Math.log(2);
 	}
 
-	private int mandelbrotAlgorithm(double real, double imag){
+	private Color mapColor(int escapeIteration, double zReal, double zImag){
+		double absZ = Math.sqrt(zReal*zReal + zImag*zImag);
+		if ( absZ <= this.magnitudeCap ) return Color.BLACK;
+		double n = escapeIteration + 1 - this.logBase2(this.logBase2(absZ));
+		n /= this.iterationCap;
+		return new Color(Color.HSBtoRGB(0.95f + 20 * (float)n ,0.6f,1.0f));
+	}
+
+	private Color mandelbrotAlgorithm(double real, double imag){
 		double zR = this.zReal;
 		double zI = this.zImag;
 		double zRealSqr = zR * zR;
@@ -297,7 +399,7 @@ public class Model{
 		
 		for (int i = 0; true; i ++){
 			if ( (zRealSqr + zImagSqr) >= magCapSqr || i == this.iterationCap){
-				return i;
+				return this.mapColor(i, zR, zI);
 			}
 			zI = 2 * zR * zI + imag;
 			zR = zRealSqr - zImagSqr + real;
