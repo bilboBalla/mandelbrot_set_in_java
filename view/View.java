@@ -133,6 +133,9 @@ public class View extends JFrame{
 		this.labels.put("zoom_about_imag", new JLabel("Zoom About I"));
 		this.labels.put("progress1", new JLabel("progress"));
 		this.labels.put("progress2", new JLabel("progress"));
+		this.labels.put("hue", new JLabel("hue"));
+		this.labels.put("saturation", new JLabel("saturation"));
+		this.labels.put("brightness", new JLabel("brightness"));
 	}
 
 	private void buildTextFields(){
@@ -145,6 +148,9 @@ public class View extends JFrame{
 		this.textFields.put("zoom_factor", new JTextField(this.textFieldLength));
 		this.textFields.put("zoom_about_real", new JTextField(this.textFieldLength));
 		this.textFields.put("zoom_about_imag", new JTextField(this.textFieldLength));
+		this.textFields.put("hue", new JTextField(this.textFieldLength));
+		this.textFields.put("saturation", new JTextField(this.textFieldLength));
+		this.textFields.put("brightness", new JTextField(this.textFieldLength));
 	}
 
 	private void buildMandelbrotDisplay(){
@@ -189,6 +195,12 @@ public class View extends JFrame{
 		contPnl.add(this.textFields.get("zoom_about_real"));
 		contPnl.add(this.labels.get("zoom_about_imag"));
 		contPnl.add(this.textFields.get("zoom_about_imag"));
+		contPnl.add(this.labels.get("hue"));
+		contPnl.add(this.textFields.get("hue"));
+		contPnl.add(this.labels.get("saturation"));
+		contPnl.add(this.textFields.get("saturation"));
+		contPnl.add(this.labels.get("brightness"));
+		contPnl.add(this.textFields.get("brightness"));
 		contPnl.add(this.buttons.get("back"));
 		contPnl.add(this.buttons.get("save"));
 		contPnl.add(this.buttons.get("bounds"));

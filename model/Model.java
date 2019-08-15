@@ -44,6 +44,11 @@ public class Model{
 	private int height;
 	private Stack<BufferedImage> imageStack;
 
+	// Color Context
+	public float hue;
+	public float saturation;
+	public float brightness;
+
 	// Getters
 	public double getTop(){return this.boundsStack.peek().get(this.TOP);}
 	public double getBottom(){return this.boundsStack.peek().get(this.BOTTOM);}
@@ -69,6 +74,7 @@ public class Model{
 		if ( newMagnitudeCap < 0) throw new IOException("Magnitude Cap Must be Integer >= 0");
 		this.magnitudeCap = newMagnitudeCap;
 	}
+
 
 	public double mapYToImag(int y){
 		return this.getTop() - y*this.pixelHeight();
@@ -167,6 +173,9 @@ public class Model{
 		this.zoomFactor = 0.5;
 		this.zoomAboutReal = 0;
 		this.zoomAboutImag = 0;
+		this.hue = 10f;
+		this.saturation = 0.6f;
+		this.brightness = 1.0f;
 		this.width = 1000;
 		this.height = 625;
 		this.pushToNextImage(1.25, -1.25, -2.5, 1.5);
@@ -203,12 +212,16 @@ public class Model{
 			}
 
 			@Override protected void process(List<Integer> chunks){
-				int latestChunk = chunks.get(chunks.size()-1);
-				Model.this.view.setLabelText("progress2", Integer.toString(latestChunk));
+				float threadsWorking = chunks.get(chunks.size()-1);
+				float percentOfThreadsWorking = threadsWorking/(float)Model.this.threadCount*100;
+				int percentDone = 100 - (int)percentOfThreadsWorking;
+				System.out.println(percentOfThreadsWorking);
+				Model.this.view.setLabelText("progress2", Integer.toString(percentDone)+" %");
 				Model.this.view.repaintMandelbrotDisplay();
 			}
 
 			@Override protected void done(){
+				Model.this.view.setLabelText("progress2", "100 %");
 				Model.this.view.repaintMandelbrotDisplay();
 			}
 			
@@ -386,8 +399,21 @@ public class Model{
 		double absZ = Math.sqrt(zReal*zReal + zImag*zImag);
 		if ( absZ <= this.magnitudeCap ) return Color.BLACK;
 		double n = escapeIteration + 1 - this.logBase2(this.logBase2(absZ));
-		n /= this.iterationCap;
-		return new Color(Color.HSBtoRGB(0.95f + 20 * (float)n ,0.6f,1.0f));
+		n = n / this.iterationCap;
+
+		//double ratio = (double)escapeIteration / (double)this.iterationCap;
+		//if (nf >= 1 ) System.out.println(nf);
+		return new Color(Color.HSBtoRGB(this.hue*(float)n ,0.6f,1.0f));
+		//return new Color(Color.HSBtoRGB((int)this.redFactor, (int)this.greenFactor, (int)this.blueFactor));
+		
+		//return new Color(
+		//	Color.HSBtoRGB(
+		//		this.hue + 10 * (float)n, 
+		//		(float)this.saturation, 
+		//		(float)this.brightness
+		//	)
+		//);
+		//return Color.WHITE;
 	}
 
 	private Color mandelbrotAlgorithm(double real, double imag){
