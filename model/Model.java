@@ -45,7 +45,8 @@ public class Model{
 	private Stack<BufferedImage> imageStack;
 
 	// Color Context
-	public float hue;
+	public float hueMultiplier;
+	public float hueAdder;
 	public float saturation;
 	public float brightness;
 
@@ -173,7 +174,8 @@ public class Model{
 		this.zoomFactor = 0.5;
 		this.zoomAboutReal = 0;
 		this.zoomAboutImag = 0;
-		this.hue = 10f;
+		this.hueMultiplier = 10f;
+		this.hueAdder = 0;
 		this.saturation = 0.6f;
 		this.brightness = 1.0f;
 		this.width = 1000;
@@ -189,7 +191,6 @@ public class Model{
 				int xRangePerThread = Model.this.width/Model.this.threadCount;
 				int nextStartingX = 0;
 				for ( int i = 0; i < Model.this.threadCount; ++ i ){
-					//Model.this.threads.add(Model.this.setUpThread(nextStartingX, nextStartingX + xRangePerThread));
 					Chunk nextChunk = new Chunk(nextStartingX, nextStartingX + xRangePerThread, 0, Model.this.height);
 					Model.this.threads.add(Model.this.setUpThread(nextChunk));
 					nextStartingX = nextStartingX + xRangePerThread;
@@ -215,7 +216,6 @@ public class Model{
 				float threadsWorking = chunks.get(chunks.size()-1);
 				float percentOfThreadsWorking = threadsWorking/(float)Model.this.threadCount*100;
 				int percentDone = 100 - (int)percentOfThreadsWorking;
-				System.out.println(percentOfThreadsWorking);
 				Model.this.view.setLabelText("progress2", Integer.toString(percentDone)+" %");
 				Model.this.view.repaintMandelbrotDisplay();
 			}
@@ -245,128 +245,6 @@ public class Model{
 			this.isComputed = false;
 		}
 	}
-
-	private class ChunkDispatcher{
-		private Vector<Chunk> chunks;
-		public int nextChunk;
-
-		public ChunkDispatcher(int width, int height, int numberOfChunks){
-			this.nextChunk = 0;
-			this.buildChunks(width, height, numberOfChunks);
-		}
-
-		public void buildChunks(int width, int height, int numberOfChunks){
-			this.chunks = new Vector<Chunk>(numberOfChunks);
-			int numberOfChunksSquareRoot = (int)Math.sqrt(numberOfChunks);
-			int widthOfChunk = width / numberOfChunksSquareRoot;
-			int heightOfChunk = height / numberOfChunksSquareRoot;
-			int nextStartX = 0;
-			int nextStartY = 0;
-			while ( true ){
-				Chunk nextChunk;
-				int nextEndY = nextStartY + heightOfChunk;
-				while ( true ){
-					int nextEndX = nextStartX + widthOfChunk;
-					nextChunk = new Chunk(nextStartX, nextEndX, nextStartY, nextEndY);
-					this.chunks.add(nextChunk);
-					nextStartX = nextEndX;
-					if ( nextEndX >= width ){
-						nextChunk.endX = width;
-						break;
-					}
-				}
-				nextStartX = 0;
-				nextStartY = nextEndY;
-				if ( nextEndY >= height ){
-					nextChunk.endY = height;
-					break;
-				}
-			}
-			System.out.println("number of chunks");
-			System.out.println(this.chunks.size());
-		}
-
-		public synchronized Chunk dispatchNextChunk(){
-			return this.chunks.get(this.nextChunk++);
-		}
-
-		public boolean thereAreUncomputedChunks(){
-			return this.nextChunk != this.chunks.size();
-		}
-	}
-
-	private Thread makeChunkWorker(ChunkDispatcher dispatcher){
-		return new Thread(new Runnable(){
-			@Override public void run(){
-				while ( dispatcher.thereAreUncomputedChunks() )
-					generatePartialImage(dispatcher.dispatchNextChunk());
-			}
-		});
-	}
-
-/*
-	private void generateImage(){
-		SwingWorker<Integer, Integer> worker = new SwingWorker<Integer, Integer>(){
-			@Override protected Integer doInBackground(){
-				ChunkDispatcher dispatcher = new ChunkDispatcher(
-					Model.this.width, 
-					Model.this.height, 
-					Model.this.numberOfChunks
-				);
-				Model.this.threads = new Vector<Thread>(Model.this.threadCount);
-				for ( int i = 0; i < Model.this.threadCount; ++ i)
-					Model.this.threads.add(Model.this.makeChunkWorker(dispatcher));
-				for ( Thread thread : Model.this.threads )
-					thread.start();
-				while ( Model.this.isWorking() )
-					publish(dispatcher.nextChunk);
-				return 0;
-			}
-
-			@Override protected void process(List<Integer> chunks){
-				int latestChunk = chunks.get(chunks.size()-1);
-				Model.this.view.setLabelText("progress2", Integer.toString(latestChunk));
-				Model.this.view.repaintMandelbrotDisplay();
-			}
-
-			@Override protected void done(){
-				Model.this.view.repaintMandelbrotDisplay();
-			}
-		};
-		worker.execute();
-	}
-/*
-
-	/*
-	private void generateImageInOneThread(){
-		SwingWorker<Integer,Integer> worker = new SwingWorker<Integer, Integer>(){
-			@Override protected Integer doInBackground(){
-				double nextImag = Model.this.getTop();
-				double nextReal = Model.this.getLeft();
-				for ( int i = 0; i < Model.this.height; i ++ ){
-					for ( int j = 0; j < Model.this.width; j ++ ){
-						int escapeIteration = Model.this.mandelbrotAlgorithm(nextReal, nextImag);
-						Color nextColor = Model.this.mapColor(escapeIteration);
-						Model.this.imageStack.peek().setRGB(j, i, nextColor.getRGB());
-						nextReal += Model.this.pixelWidth();
-						publish((i+1)*(j+1));
-					}
-					nextReal = Model.this.getLeft();
-					nextImag -= Model.this.pixelHeight();
-				}
-				return 0;
-			}
-
-			@Override protected void process(List<Integer> chunks){
-				int latestChunk = chunks.get(chunks.size()-1);
-				Model.this.view.setLabelText("progress2", Integer.toString(latestChunk));
-				Model.this.view.repaintMandelbrotDisplay();
-			}
-		};
-		worker.execute();
-	}
-	*/
-
 
 	private Thread setUpThread(Chunk chunk){
 		return new Thread(new Runnable(){
@@ -400,20 +278,13 @@ public class Model{
 		if ( absZ <= this.magnitudeCap ) return Color.BLACK;
 		double n = escapeIteration + 1 - this.logBase2(this.logBase2(absZ));
 		n = n / this.iterationCap;
-
-		//double ratio = (double)escapeIteration / (double)this.iterationCap;
-		//if (nf >= 1 ) System.out.println(nf);
-		return new Color(Color.HSBtoRGB(this.hue*(float)n ,0.6f,1.0f));
-		//return new Color(Color.HSBtoRGB((int)this.redFactor, (int)this.greenFactor, (int)this.blueFactor));
-		
-		//return new Color(
-		//	Color.HSBtoRGB(
-		//		this.hue + 10 * (float)n, 
-		//		(float)this.saturation, 
-		//		(float)this.brightness
-		//	)
-		//);
-		//return Color.WHITE;
+		return new Color(
+			Color.HSBtoRGB(
+				(this.hueMultiplier*(float)n)+this.hueAdder,
+				this.saturation,
+				this.brightness
+			)
+		);
 	}
 
 	private Color mandelbrotAlgorithm(double real, double imag){

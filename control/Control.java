@@ -121,7 +121,8 @@ public class Control{
 			this.model.zoomFactor    = Double.parseDouble(this.view.getTextFieldText("zoom_factor"));
 			this.model.zoomAboutReal = Double.parseDouble(this.view.getTextFieldText("zoom_about_real"));
 			this.model.zoomAboutImag = Double.parseDouble(this.view.getTextFieldText("zoom_about_imag"));
-			this.model.hue           = Float.parseFloat(this.view.getTextFieldText("hue"));
+			this.model.hueMultiplier = Float.parseFloat(this.view.getTextFieldText("hue_multiplier"));
+			this.model.hueAdder      = Float.parseFloat(this.view.getTextFieldText("hue_adder"));
 			this.model.saturation    = Float.parseFloat(this.view.getTextFieldText("saturation"));
 			this.model.brightness    = Float.parseFloat(this.view.getTextFieldText("brightness"));
 			this.model.setMagnitudeCap(Double.parseDouble(this.view.getTextFieldText("mag_cap")));
@@ -146,7 +147,8 @@ public class Control{
 		this.view.setTextFieldText("zoom_about_real", Double.toString(this.model.zoomAboutReal));
 		this.view.setTextFieldText("zoom_about_imag", Double.toString(this.model.zoomAboutImag));
 		this.view.setTextFieldText("zoom_factor", Double.toString(this.model.zoomFactor));
-		this.view.setTextFieldText("hue", Float.toString(this.model.hue));
+		this.view.setTextFieldText("hue_multiplier", Float.toString(this.model.hueMultiplier));
+		this.view.setTextFieldText("hue_adder", Float.toString(this.model.hueAdder));
 		this.view.setTextFieldText("saturation", Float.toString(this.model.saturation));
 		this.view.setTextFieldText("brightness", Float.toString(this.model.brightness));
 		this.view.setLabelText("top", Double.toString(this.model.getTop()));
