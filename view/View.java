@@ -6,6 +6,7 @@ import javax.swing.JPanel;
 import javax.swing.JLabel;
 import javax.swing.JButton;
 import javax.swing.JTextField;
+import javax.swing.JRadioButton;
 import javax.swing.SwingConstants;
 import javax.swing.BorderFactory;
 import java.awt.BorderLayout;
@@ -29,10 +30,19 @@ public class View extends JFrame{
 	private boolean boundsAreVisible;
 	private BufferedImage mandelbrotImage;
 	private JPanel mandelbrotDisplay;
+	private JPanel controlPanel;
 	private HashMap<String, JLabel> labels;
 	private HashMap<String, JButton> buttons;
 	private HashMap<String, JTextField> textFields;
 	private int textFieldLength = 5;
+
+	public void hideControlPanel(){
+		this.controlPanel.setVisible(false);
+	}
+
+	public void showControlPanel(){
+		this.controlPanel.setVisible(true);
+	}
 
 	public void addMouseListenerToMandelbrotDisplay(MouseListener listener){
 		this.mandelbrotDisplay.addMouseListener(listener);
@@ -115,6 +125,9 @@ public class View extends JFrame{
 		this.buttons.put("bounds", new JButton("Bounds"));
 		this.buttons.put("back", new JButton("Back"));
 		this.buttons.put("save", new JButton("Save Image"));
+		this.buttons.put("about", new JButton("About"));
+		this.buttons.put("hideControlPanel", new JButton("Hide"));
+		this.buttons.put("showControlPanel", new JButton("Show"));
 	}
 
 	private void buildLabels(){
@@ -170,8 +183,11 @@ public class View extends JFrame{
 		manDisp.add(this.labels.get("bottom"), BorderLayout.SOUTH);
 		manDisp.add(this.labels.get("left"), BorderLayout.WEST);
 		manDisp.add(this.labels.get("right"), BorderLayout.EAST);
+		manDisp.add(this.buttons.get("showControlPanel"), BorderLayout.PAGE_END);
 		this.labels.get("top").setHorizontalAlignment(SwingConstants.CENTER);
 		this.labels.get("bottom").setHorizontalAlignment(SwingConstants.CENTER);
+		this.labels.get("bottom").setLayout(new BorderLayout());
+		this.labels.get("bottom").add(this.buttons.get("showControlPanel"), BorderLayout.LINE_END);
 		this.mandelbrotDisplay = manDisp;
 		this.boundsAreVisible = true;
 		this.getContentPane().add(this.mandelbrotDisplay, BorderLayout.WEST);
@@ -205,13 +221,16 @@ public class View extends JFrame{
 		contPnl.add(this.textFields.get("saturation"));
 		contPnl.add(this.labels.get("brightness"));
 		contPnl.add(this.textFields.get("brightness"));
+		contPnl.add(this.buttons.get("zoom"));
 		contPnl.add(this.buttons.get("back"));
 		contPnl.add(this.buttons.get("save"));
 		contPnl.add(this.buttons.get("bounds"));
-		contPnl.add(this.buttons.get("zoom"));
+		contPnl.add(this.buttons.get("about"));
+		contPnl.add(this.buttons.get("hideControlPanel"));
 		contPnl.add(this.labels.get("progress1"));
 		contPnl.add(this.labels.get("progress2"));
 		this.labels.get("progress1").setHorizontalAlignment(SwingConstants.CENTER);
-		this.getContentPane().add(contPnl, BorderLayout.EAST);
+		this.controlPanel = contPnl;
+		this.getContentPane().add(this.controlPanel, BorderLayout.EAST);
 	}
 }

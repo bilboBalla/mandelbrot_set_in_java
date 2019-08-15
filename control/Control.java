@@ -39,6 +39,15 @@ public class Control{
 		this.view.addMouseListenerToMandelbrotDisplay(new MouseListener(){
 			@Override public void mouseClicked(MouseEvent e)
 			{  
+				if ( SwingUtilities.isRightMouseButton(e) ){
+					Control.this.backButtonWasClicked();
+					return;
+				}
+				if ( e.getClickCount() == 2 ){
+					Control.this.mandelbrotDisplayWasClicked(e);
+					Control.this.zoomButtonClicked();
+					return;
+				}
 				Control.this.mandelbrotDisplayWasClicked(e);
 			}
 			@Override public void mouseEntered(MouseEvent e){}
@@ -64,6 +73,21 @@ public class Control{
 		this.view.addActionToButton("back", new ActionListener(){
 			public void actionPerformed(ActionEvent e){
 				Control.this.backButtonWasClicked();
+			}
+		});
+		this.view.addActionToButton("about", new ActionListener(){
+			public void actionPerformed(ActionEvent e){
+				Control.this.aboutButtonWasClicked();
+			}
+		});
+		this.view.addActionToButton("hideControlPanel", new ActionListener(){
+			public void actionPerformed(ActionEvent e){
+				Control.this.hideButtonWasClicked();
+			}
+		});
+		this.view.addActionToButton("showControlPanel", new ActionListener(){
+			public void actionPerformed(ActionEvent e){
+				Control.this.showButtonWasClicked();
 			}
 		});
 		this.view.addKeyListener(new KeyListener(){
@@ -112,6 +136,20 @@ public class Control{
 		if ( ! this.updateModel() ) return;
 		this.model.zoom();
 		this.updateView();
+	}
+
+	private void aboutButtonWasClicked(){
+
+	}
+
+	private void hideButtonWasClicked(){
+		this.view.hideControlPanel();
+		this.view.pack();
+	}
+
+	private void showButtonWasClicked(){
+		this.view.showControlPanel();
+		this.view.pack();
 	}
 
 	private boolean updateModel(){
