@@ -18,11 +18,14 @@ import java.awt.image.BufferedImage;
 import java.awt.GridLayout;
 import java.awt.Color;
 import java.awt.event.MouseListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseMotionListener;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyListener;
 import java.awt.event.WindowFocusListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.awt.Point;
 import java.util.HashMap;
 
 public class View extends JFrame{
@@ -183,12 +186,27 @@ public class View extends JFrame{
 		manDisp.add(this.labels.get("bottom"), BorderLayout.SOUTH);
 		manDisp.add(this.labels.get("left"), BorderLayout.WEST);
 		manDisp.add(this.labels.get("right"), BorderLayout.EAST);
-		manDisp.add(this.buttons.get("showControlPanel"), BorderLayout.PAGE_END);
+		manDisp.add(this.buttons.get("showControlPanel"), BorderLayout.CENTER);
+		this.buttons.get("showControlPanel").setHorizontalAlignment(SwingConstants.RIGHT);
+		this.buttons.get("showControlPanel").setVerticalAlignment(SwingConstants.BOTTOM);
+		this.buttons.get("showControlPanel").setSize(new Dimension(30, 30));
 		this.labels.get("top").setHorizontalAlignment(SwingConstants.CENTER);
 		this.labels.get("bottom").setHorizontalAlignment(SwingConstants.CENTER);
-		this.labels.get("bottom").setLayout(new BorderLayout());
-		this.labels.get("bottom").add(this.buttons.get("showControlPanel"), BorderLayout.LINE_END);
+		//this.labels.get("bottom").setLayout(new BorderLayout());
+		//this.labels.get("bottom").add(this.buttons.get("showControlPanel"), BorderLayout.LINE_END);
 		this.mandelbrotDisplay = manDisp;
+		this.mandelbrotDisplay.addMouseMotionListener(new MouseMotionListener(){
+			public void mouseMoved(MouseEvent e){
+				Point p = View.this.mandelbrotDisplay.getMousePosition();
+				int panelWidth = View.this.mandelbrotDisplay.getWidth();
+				int panelHeight = View.this.mandelbrotDisplay.getHeight();
+				if ( panelWidth - 70 < p.getX() && panelHeight - 40 < p.getY() )
+					View.this.buttons.get("showControlPanel").setVisible(true);
+				else
+					View.this.buttons.get("showControlPanel").setVisible(false);
+			}
+			public void mouseDragged(MouseEvent e){}
+		});
 		this.boundsAreVisible = true;
 		this.getContentPane().add(this.mandelbrotDisplay, BorderLayout.WEST);
 	}

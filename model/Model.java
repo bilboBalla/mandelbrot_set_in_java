@@ -272,7 +272,7 @@ public class Model{
 	private double logBase2(double number){
 		return Math.log(number)/Math.log(2);
 	}
-
+ 
 	private Color mapColor(int escapeIteration, double zReal, double zImag){
 		double absZ = Math.sqrt(zReal*zReal + zImag*zImag);
 		if ( absZ <= this.magnitudeCap ) return Color.BLACK;

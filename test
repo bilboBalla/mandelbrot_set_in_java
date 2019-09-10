@@ -12,7 +12,8 @@ rm -f *.class
 rm -rf */*.class
 
 echo ""
-echo "COMPILING APP"
+jversion="$(javac --version)"
+echo "COMPILING APP: ${jversion}"
 javac Main.java
 
 echo ""
