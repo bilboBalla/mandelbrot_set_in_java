@@ -45,6 +45,7 @@ public class View extends JFrame{
 
 	public void showControlPanel(){
 		this.controlPanel.setVisible(true);
+		this.buttons.get("showControlPanel").setVisible(false);
 	}
 
 	public void addMouseListenerToMandelbrotDisplay(MouseListener listener){
@@ -153,6 +154,7 @@ public class View extends JFrame{
 		this.labels.put("hue_adder", new JLabel("hue adder"));
 		this.labels.put("saturation", new JLabel("saturation"));
 		this.labels.put("brightness", new JLabel("brightness"));
+		this.labels.put("showControlPanelHolder", new JLabel());
 	}
 
 	private void buildTextFields(){
@@ -171,32 +173,60 @@ public class View extends JFrame{
 		this.textFields.put("brightness", new JTextField(this.textFieldLength));
 	}
 
-	private void buildMandelbrotDisplay(){
-		JPanel manDisp = new JPanel(){
+	private void addComponentsToMandelbrotDisplay(){
+		JLabel r0c0fill = new JLabel();
+		this.mandelbrotDisplay.add(r0c0fill);
+		this.mandelbrotDisplay.add(this.labels.get("top"));
+		JLabel r0c2fill = new JLabel();
+		this.mandelbrotDisplay.add(r0c2fill);
+		this.mandelbrotDisplay.add(this.labels.get("left"));
+		JLabel r1c1fill = new JLabel();
+		this.mandelbrotDisplay.add(r1c1fill);
+		this.mandelbrotDisplay.add(this.labels.get("right"));
+		JLabel r2c0fill = new JLabel();
+		this.mandelbrotDisplay.add(r2c0fill);
+		this.mandelbrotDisplay.add(this.labels.get("bottom"));
+		JLabel r2c2fill = this.labels.get("showControlPanelHolder");
+		this.mandelbrotDisplay.add(r2c2fill);
+		this.boundsAreVisible = true;
+	}
+
+	private void alignBoundsLabels(){
+		this.labels.get("top").setHorizontalAlignment(SwingConstants.CENTER);
+		this.labels.get("top").setVerticalAlignment(SwingConstants.TOP);
+		this.labels.get("right").setHorizontalAlignment(SwingConstants.RIGHT);
+		this.labels.get("bottom").setHorizontalAlignment(SwingConstants.CENTER);
+		this.labels.get("bottom").setVerticalAlignment(SwingConstants.BOTTOM);
+	}
+
+	private void setUpShowControlPanelButton(){
+		JLabel bottomRight = this.labels.get("showControlPanelHolder");
+		JLabel container = new JLabel();
+		bottomRight.setLayout(new BorderLayout());
+		container.setLayout(new BorderLayout());
+		container.setText(" ");
+		bottomRight.add(container, BorderLayout.SOUTH);
+		container.add(this.buttons.get("showControlPanel"), BorderLayout.EAST);
+		this.buttons.get("showControlPanel").setVisible(false);
+	}
+
+	private void initMandelbrotDisplayAndPaintingBehavior(){
+		this.mandelbrotDisplay = new JPanel(){
 			@Override public void paintComponent(Graphics g){
 				super.paintComponent(g);
 				Graphics2D g2 = (Graphics2D) g;
 				g2.drawImage(View.this.mandelbrotImage, null, null);
 			}
 		};
-		manDisp.setLayout(new BorderLayout());
-		manDisp.setBorder(BorderFactory.createLineBorder(Color.BLACK));
-		manDisp.setPreferredSize(new Dimension(1000, 625));
-		manDisp.add(this.labels.get("top"), BorderLayout.NORTH);
-		manDisp.add(this.labels.get("bottom"), BorderLayout.SOUTH);
-		manDisp.add(this.labels.get("left"), BorderLayout.WEST);
-		manDisp.add(this.labels.get("right"), BorderLayout.EAST);
-		manDisp.add(this.buttons.get("showControlPanel"), BorderLayout.CENTER);
-		this.buttons.get("showControlPanel").setHorizontalAlignment(SwingConstants.RIGHT);
-		this.buttons.get("showControlPanel").setVerticalAlignment(SwingConstants.BOTTOM);
-		this.buttons.get("showControlPanel").setSize(new Dimension(30, 30));
-		this.labels.get("top").setHorizontalAlignment(SwingConstants.CENTER);
-		this.labels.get("bottom").setHorizontalAlignment(SwingConstants.CENTER);
-		//this.labels.get("bottom").setLayout(new BorderLayout());
-		//this.labels.get("bottom").add(this.buttons.get("showControlPanel"), BorderLayout.LINE_END);
-		this.mandelbrotDisplay = manDisp;
+		this.mandelbrotDisplay.setLayout(new GridLayout(3, 3));
+		this.mandelbrotDisplay.setBorder(BorderFactory.createLineBorder(Color.BLACK));
+		this.mandelbrotDisplay.setPreferredSize(new Dimension(1000, 625));
+	}
+
+	private void addShowButtonBehavior(){
 		this.mandelbrotDisplay.addMouseMotionListener(new MouseMotionListener(){
 			public void mouseMoved(MouseEvent e){
+				if ( View.this.controlPanel.isVisible() ) return;
 				Point p = View.this.mandelbrotDisplay.getMousePosition();
 				int panelWidth = View.this.mandelbrotDisplay.getWidth();
 				int panelHeight = View.this.mandelbrotDisplay.getHeight();
@@ -207,7 +237,14 @@ public class View extends JFrame{
 			}
 			public void mouseDragged(MouseEvent e){}
 		});
-		this.boundsAreVisible = true;
+	}
+
+	private void buildMandelbrotDisplay(){
+		this.initMandelbrotDisplayAndPaintingBehavior();
+		this.addComponentsToMandelbrotDisplay();
+		this.alignBoundsLabels();
+		this.setUpShowControlPanelButton();
+		this.addShowButtonBehavior();
 		this.getContentPane().add(this.mandelbrotDisplay, BorderLayout.WEST);
 	}
 
