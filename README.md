@@ -11,6 +11,7 @@ To run this app simply download the MandelbrotSet.jar file and run it. You may n
 Java 9.0.4 or later
 
 ### Some examples of images generated from the Mandelbrot Set Explorer
+![example zero](/examples/start.png)
 ![example one](/examples/one.png)
 ![example two](/examples/two.png)
 ![example three](/examples/three.png)
