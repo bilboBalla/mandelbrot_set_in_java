@@ -185,12 +185,12 @@ public class Control{
 		JFrame aboutWindow = new JFrame();
 		aboutWindow.setTitle("About");
 		aboutWindow.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-		aboutWindow.setPreferredSize(new Dimension(600, 600));
+		aboutWindow.setPreferredSize(new Dimension(630, 600));
 
 		String contentString = "";
 
 		try {
-			File content = new File("/Users/seantowne/Desktop/mandelbrot_set_in_java/view/about/about.html");
+			File content = new File("./view/about/about.html");
 			Scanner scanner = new Scanner(content);
 			while ( scanner.hasNextLine() ){
 				contentString += scanner.nextLine()+"\n";
@@ -199,9 +199,12 @@ public class Control{
 			contentString = "oops, couldn't find file";
 		}
 
+		//String source = Control.class.getClassLoader().getSystemResource("small.png").toString();
+		//System.out.println(source);
 		JEditorPane jep = new JEditorPane("text/html", contentString);
 		jep.setEditable(false);
 		JScrollPane scrollPane = new JScrollPane(jep);
+		jep.setCaretPosition(0);
 
 		aboutWindow.add(scrollPane);
 
