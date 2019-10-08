@@ -151,10 +151,10 @@ public class View extends JFrame{
 
 	private void buildLabels(){
 		this.labels = new HashMap<String,JLabel>();
-		this.labels.put("top", new JLabel("1.25"));
-		this.labels.put("bottom", new JLabel("-1.25"));
-		this.labels.put("left", new JLabel("-2.5"));
-		this.labels.put("right", new JLabel("1.5"));
+		this.labels.put("top", new JLabel(""));
+		this.labels.put("bottom", new JLabel(""));
+		this.labels.put("left", new JLabel(""));
+		this.labels.put("right", new JLabel(""));
 		this.labels.put("z_real", new JLabel("Z Real"));
 		this.labels.put("z_imag", new JLabel("Z Imag"));
 		this.labels.put("mag_cap", new JLabel("Mag. Cap"));

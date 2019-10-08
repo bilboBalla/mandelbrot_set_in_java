@@ -4,7 +4,7 @@ This project is a lightweight desktop app for exploring the Mandelbrot Set.
 
 ## Getting Started
 
-To run this app simply download the MandelbrotSet.jar file and run it. You may need to update the version of java you are running, I built it with jdk 9.0.4.
+To run this app simply download the MandelbrotSet.jar file and run it. You may need to update the version of java you are running, I built it with jdk 9.0.4. alternatively you can clone the repo and run the test script from a terminal or command promt.
 
 ### Prerequisites
 

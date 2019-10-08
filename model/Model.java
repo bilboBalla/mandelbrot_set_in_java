@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.util.Stack;
 import java.util.Vector;
 import java.util.List;
+import java.util.HashMap;
 import javax.swing.SwingWorker;
 import java.awt.Graphics;
 
@@ -150,9 +151,9 @@ public class Model{
 	    return b;
 	}
 
-	public Model(View view){
+	public Model(View view, HashMap<String, Double> settings){
 		this.view = view;
-		this.construct();
+		this.construct(settings);
 	}
 
 	public double realWidth(){
@@ -172,26 +173,26 @@ public class Model{
 		return this.imagHeight() / (this.height-1);
 	}
 
-	private void construct(){
-		this.zReal          = 0;
-		this.zImag          = 0;
-		this.magnitudeCap   = 2;
-		this.iterationCap   = 10000;
-		this.threadCount    = 100;
-		this.zoomFactor     = 0.5;
-		this.zoomAboutReal  = 0;
-		this.zoomAboutImag  = 0;
-		this.hueMultiplier  = 10f;
-		this.hueAdder       = 0;
-		this.saturation     = 0.6f;
-		this.brightness     = 1.0f;
-		this.width          = 1000;
-		this.height         = 625;
+	private void construct(HashMap<String, Double> settings){
+		this.zReal          = settings.get("zReal");
+		this.zImag          = settings.get("zImag");
+		this.magnitudeCap   = settings.get("magnitudeCap");
+		this.iterationCap   = (int)settings.get("iterationCap").doubleValue();
+		this.threadCount    = (int)settings.get("threadCount").doubleValue();
+		this.zoomFactor     = settings.get("zoomFactor");
+		this.zoomAboutReal  = settings.get("zoomAboutReal");
+		this.zoomAboutImag  = settings.get("zoomAboutImag");
+		this.hueMultiplier  = settings.get("hueMultiplier").floatValue();
+		this.hueAdder       = settings.get("hueAdder").floatValue();
+		this.saturation     = settings.get("saturation").floatValue();
+		this.brightness     = settings.get("brightness").floatValue();
+		this.width          = (int)settings.get("width").doubleValue();
+		this.height         = (int)settings.get("height").doubleValue();
 		this.pushToNextImage(
-			1.25,
-			-1.25, 
-			-2.5, 
-			1.5
+			settings.get("top"),
+			settings.get("bottom"), 
+			settings.get("left"), 
+			settings.get("right")
 		);
 	}
 

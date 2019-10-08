@@ -5,6 +5,7 @@ import view.*;
 import model.*;
 import java.util.List;
 import java.util.Scanner;
+import java.util.HashMap;
 import java.text.DecimalFormat;
 import java.awt.Point;
 import java.awt.Dimension;
@@ -41,13 +42,30 @@ public class Control{
 	}
 
 	private void construct(){
+		HashMap<String, Double> settings = this.loadSettings();
 		this.view = new View();
-		this.model = new Model(this.view);
+		this.model = new Model(this.view, settings);
 		this.updateView();
 		this.addEventHandlers();
 	}
 
+	private HashMap<String, Double> loadSettings(){
+		HashMap<String, Double> settings = new HashMap<String, Double>();
+		try {
+			File settingsFile = new File("./defaultSettings.txt");
+			Scanner scanner = new Scanner(settingsFile);
+			while ( scanner.hasNextLine() ){
+				String nl = scanner.nextLine();
+				String field = nl.split(" ")[0];
+				String value = nl.split(" ")[1];
+				settings.put(field, Double.parseDouble(value));
+			}
+		}catch( FileNotFoundException e){}
+		return settings;
+	}
+
 	private void addEventHandlers(){
+
 		this.view.addMouseListenerToMandelbrotDisplay(new MouseListener(){
 			@Override public void mouseClicked(MouseEvent e){  
 				Control.this.mandelbrotDisplayWasClicked(e);
@@ -118,7 +136,7 @@ public class Control{
 
 	private void enterKeyPressed(KeyEvent e){
 		if ( e.getKeyCode() == KeyEvent.VK_ENTER )
-					Control.this.zoomButtonClicked();
+			Control.this.zoomButtonClicked();
 	}
 
 	// For finding the show button when control panel is hidden
