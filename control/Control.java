@@ -205,6 +205,7 @@ public class Control{
 
 		aboutWindow.add(scrollPane);
 
+		aboutWindow.setResizable(false);
 		aboutWindow.pack();
 		aboutWindow.setVisible(true);
 	}
