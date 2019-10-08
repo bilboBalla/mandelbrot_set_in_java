@@ -4,7 +4,12 @@ package control;
 import view.*;
 import model.*;
 import java.util.List;
+import java.util.Scanner;
+import java.text.DecimalFormat;
+import java.awt.Point;
+import java.awt.Dimension;
 import java.awt.event.MouseListener;
+import java.awt.event.MouseMotionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -14,15 +19,23 @@ import java.io.IOException;
 import java.io.File;
 import javax.swing.JOptionPane;
 import javax.swing.JFileChooser;
+import javax.swing.JLabel;
 import javax.imageio.ImageIO;
 import javax.swing.SwingWorker;
 import javax.swing.SwingUtilities;
+import javax.swing.JFrame;
+import javax.swing.JEditorPane;
+import java.io.FileNotFoundException;
+import java.nio.file.Files;
+import java.io.File;
 
 
 public class Control{
 
 	private View view;
 	private Model model;
+
+	private Point lastPressedPoint;
 
 	public Control(){
 		this.construct();
@@ -37,70 +50,124 @@ public class Control{
 
 	private void addEventHandlers(){
 		this.view.addMouseListenerToMandelbrotDisplay(new MouseListener(){
-			@Override public void mouseClicked(MouseEvent e)
-			{  
-				if ( SwingUtilities.isRightMouseButton(e) ){
-					Control.this.backButtonWasClicked();
-					return;
-				}
-				if ( e.getClickCount() == 2 ){
-					Control.this.mandelbrotDisplayWasClicked(e);
-					Control.this.zoomButtonClicked();
-					return;
-				}
+			@Override public void mouseClicked(MouseEvent e){  
 				Control.this.mandelbrotDisplayWasClicked(e);
 			}
 			@Override public void mouseEntered(MouseEvent e){}
-			@Override public void mousePressed(MouseEvent e){}
-			@Override public void mouseReleased(MouseEvent e){}
+			@Override public void mousePressed(MouseEvent e){
+				//Control.this.mousePressedInMandelbrotDisplay(e);
+			}
+			@Override public void mouseReleased(MouseEvent e){
+				//Control.this.mouseReleasedInMandelbrotDisplay(e);
+			}
 			@Override public void mouseExited(MouseEvent e){}
 		});
+
+		this.view.addMouseMotionListenerToMandelbrotDisplay(new MouseMotionListener(){
+			@Override public void mouseMoved(MouseEvent e){
+				Control.this.mouseMovedInMandelbrotDisplay(e);
+			}
+			@Override public void mouseDragged(MouseEvent e){
+				Control.this.mouseDraggedInMandelbrotDisplay(e);
+			}
+		});
+
 		this.view.addActionToButton("bounds", new ActionListener(){
 			public void actionPerformed(ActionEvent e){
 				Control.this.boundsButtonClicked();
 			}
 		});
+
 		this.view.addActionToButton("zoom", new ActionListener(){
 			public void actionPerformed(ActionEvent e){
 				Control.this.zoomButtonClicked();
 			}
 		});
+
 		this.view.addActionToButton("save", new ActionListener(){
 			public void actionPerformed(ActionEvent e){
 				Control.this.saveButtonWasClicked();
 			}
 		});
+
 		this.view.addActionToButton("back", new ActionListener(){
 			public void actionPerformed(ActionEvent e){
 				Control.this.backButtonWasClicked();
 			}
 		});
+
 		this.view.addActionToButton("about", new ActionListener(){
 			public void actionPerformed(ActionEvent e){
 				Control.this.aboutButtonWasClicked();
 			}
 		});
+
 		this.view.addActionToButton("hideControlPanel", new ActionListener(){
 			public void actionPerformed(ActionEvent e){
 				Control.this.hideButtonWasClicked();
 			}
 		});
+
 		this.view.addActionToButton("showControlPanel", new ActionListener(){
 			public void actionPerformed(ActionEvent e){
 				Control.this.showButtonWasClicked();
 			}
 		});
+
 		this.view.addKeyListener(new KeyListener(){
 			@Override public void keyTyped(KeyEvent e){}
 			@Override public void keyPressed(KeyEvent e){}
 			@Override public void keyReleased(KeyEvent e){
-				if ( e.getKeyCode() == KeyEvent.VK_ENTER )
-					Control.this.zoomButtonClicked();
+				Control.this.enterKeyPressed(e);
 			}
 		});
 	}
 
+	private void mousePressedInMandelbrotDisplay(MouseEvent e){
+		this.lastPressedPoint = e.getPoint();
+	}
+
+	private void mouseReleasedInMandelbrotDisplay(MouseEvent e){
+		int x_0 = this.lastPressedPoint.x;
+		int y_0 = this.lastPressedPoint.y;
+		int x_1 = e.getPoint().x;
+		if ( x_0 == x_1 ) return;
+
+		int left = (x_0 > x_1)?x_1:x_0;
+		int right = (x_0 > x_1)?x_0:x_1;
+		int width = right - left;
+		double height = width * 0.625;
+		int top = y_0 - (int)(height/2);
+		int bottom = y_0 + (int)(height/2);
+
+		this.areaSelected(
+			this.model.mapYToImag(top),
+			this.model.mapYToImag(bottom),
+			this.model.mapXToReal(left),
+			this.model.mapXToReal(right)
+		);
+	}
+
+	private void enterKeyPressed(KeyEvent e){
+		if ( e.getKeyCode() == KeyEvent.VK_ENTER )
+					Control.this.zoomButtonClicked();
+	}
+
+	// For finding the show button when control panel is hidden
+	private void mouseMovedInMandelbrotDisplay(MouseEvent e){
+		this.view.mouseMovedInMandelbrotDisplay(e);
+	}
+
+	private void mouseDraggedInMandelbrotDisplay(MouseEvent e){
+		//System.out.println(e.getPoint());
+	}
+
 	private void mandelbrotDisplayWasClicked(MouseEvent e){
+		if ( SwingUtilities.isRightMouseButton(e) ){
+			Control.this.backButtonWasClicked();
+			return;
+		}
+
 		this.view.reFocusToMandelbrotDisplay();
 		double selectedReal = this.model.mapXToReal(e.getX());
 		double selectedImag = this.model.mapYToImag(e.getY());
@@ -108,6 +175,11 @@ public class Control{
 		this.view.setTextFieldText("zoom_about_imag", Double.toString(selectedImag));
 		this.model.zoomAboutReal = selectedReal;
 		this.model.zoomAboutImag = selectedImag;
+
+		if ( e.getClickCount() == 2 ){
+			Control.this.zoomButtonClicked();
+			return;
+		}
 	}
 
 	private void saveButtonWasClicked(){
@@ -138,8 +210,41 @@ public class Control{
 		this.updateView();
 	}
 
-	private void aboutButtonWasClicked(){
+	private void areaSelected(double top, double bottom, double left, double right){
+		if ( this.model.isWorking() ) return;
+		if ( ! this.updateModel() ) return;
+		this.model.zoom(top,bottom, left, right);
+		this.updateView();
+	}
 
+	private void aboutButtonWasClicked(){
+		JFrame aboutWindow = new JFrame();
+		aboutWindow.setTitle("About");
+		aboutWindow.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+		aboutWindow.setPreferredSize(new Dimension(600, 600));
+		
+
+
+
+		String contentString = "";
+
+		try {
+			File content = new File("/Users/seantowne/Desktop/mandelbrot_set_in_java/view/about/about.html");
+			Scanner scanner = new Scanner(content);
+			while ( scanner.hasNextLine() ){
+				contentString += scanner.nextLine()+"\n";
+			}
+		}catch( FileNotFoundException e){
+			contentString = "oops, couldn't find file";
+		}
+
+		JEditorPane jep = new JEditorPane("text/html", contentString);
+		aboutWindow.add(jep);
+
+
+
+		aboutWindow.pack();
+		aboutWindow.setVisible(true);
 	}
 
 	private void hideButtonWasClicked(){
@@ -177,6 +282,9 @@ public class Control{
 	}
 
 	private boolean updateView(){
+		double areaInView = Math.abs(this.model.realWidth()*this.model.imagHeight());
+		DecimalFormat df = new DecimalFormat("0.000E00");
+		this.view.setLabelText("area_in_view_value", df.format(areaInView));
 		this.view.setTextFieldText("z_real", Double.toString(this.model.zReal));
 		this.view.setTextFieldText("z_imag", Double.toString(this.model.zImag));
 		this.view.setTextFieldText("mag_cap", Double.toString(this.model.magnitudeCap));

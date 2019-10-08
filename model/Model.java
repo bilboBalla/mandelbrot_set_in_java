@@ -22,7 +22,6 @@ public class Model{
 	public double magnitudeCap;
 	public int    iterationCap;
 	public int    threadCount;
-	public int    numberOfChunks;
 	public Vector<Thread> threads;
 
 	// Zoom Context
@@ -113,6 +112,15 @@ public class Model{
 		);
 	}
 
+	public void zoom(double top, double bottom, double left, double right){
+		this.pushToNextImage(
+			top,
+			bottom,
+			left,
+			right
+		);
+	}
+
 	public void popToLastImage(){
 		if ( this.boundsStack.size() <= 1) return;
 		if ( this.imageStack.size() <= 1) return;
@@ -147,11 +155,11 @@ public class Model{
 		this.construct();
 	}
 
-	private double realWidth(){
+	public double realWidth(){
 		return this.getRight() - this.getLeft();
 	}
 
-	private double imagHeight(){
+	public double imagHeight(){
 		return this.getTop() - this.getBottom();
 	}
 
@@ -165,22 +173,26 @@ public class Model{
 	}
 
 	private void construct(){
-		this.zReal = 0;
-		this.zImag = 0;
-		this.magnitudeCap = 2;
-		this.iterationCap = 10000;
-		this.threadCount = 100;
-		this.numberOfChunks = 650000;
-		this.zoomFactor = 0.5;
-		this.zoomAboutReal = 0;
-		this.zoomAboutImag = 0;
-		this.hueMultiplier = 10f;
-		this.hueAdder = 0;
-		this.saturation = 0.6f;
-		this.brightness = 1.0f;
-		this.width = 1000;
-		this.height = 625;
-		this.pushToNextImage(1.25, -1.25, -2.5, 1.5);
+		this.zReal          = 0;
+		this.zImag          = 0;
+		this.magnitudeCap   = 2;
+		this.iterationCap   = 10000;
+		this.threadCount    = 100;
+		this.zoomFactor     = 0.5;
+		this.zoomAboutReal  = 0;
+		this.zoomAboutImag  = 0;
+		this.hueMultiplier  = 10f;
+		this.hueAdder       = 0;
+		this.saturation     = 0.6f;
+		this.brightness     = 1.0f;
+		this.width          = 1000;
+		this.height         = 625;
+		this.pushToNextImage(
+			1.25,
+			-1.25, 
+			-2.5, 
+			1.5
+		);
 	}
 
 

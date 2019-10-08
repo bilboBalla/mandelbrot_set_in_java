@@ -52,6 +52,10 @@ public class View extends JFrame{
 		this.mandelbrotDisplay.addMouseListener(listener);
 	}
 
+	public void addMouseMotionListenerToMandelbrotDisplay(MouseMotionListener listener){
+		this.mandelbrotDisplay.addMouseMotionListener(listener);
+	}
+
 	public void setMandelbrotImage(BufferedImage newMandelbrotImage){
 		this.mandelbrotImage = newMandelbrotImage;
 		this.mandelbrotDisplay.repaint();
@@ -84,6 +88,17 @@ public class View extends JFrame{
 		this.labels.get("left").setVisible(!this.boundsAreVisible);
 		this.labels.get("right").setVisible(!this.boundsAreVisible);
 		this.boundsAreVisible = !this.boundsAreVisible;
+	}
+
+	// to be added to an event listener by the Control class
+	public void mouseMovedInMandelbrotDisplay(MouseEvent e){
+		if ( this.controlPanel.isVisible() ) return;
+		int triggerWidth = this.mandelbrotDisplay.getWidth()-70;
+		int triggerHeight = this.mandelbrotDisplay.getHeight()-40;
+		Point mousePosition = e.getPoint();
+		boolean mouseInRange = mousePosition.getX()>triggerWidth && mousePosition.getY()>triggerHeight;
+		if ( mouseInRange ) this.buttons.get("showControlPanel").setVisible(true);
+		else this.buttons.get("showControlPanel").setVisible(false);
 	}
 
 	public void repaintMandelbrotDisplay(){
@@ -154,6 +169,8 @@ public class View extends JFrame{
 		this.labels.put("hue_adder", new JLabel("hue adder"));
 		this.labels.put("saturation", new JLabel("saturation"));
 		this.labels.put("brightness", new JLabel("brightness"));
+		this.labels.put("area_in_view", new JLabel("area in view: "));
+		this.labels.put("area_in_view_value", new JLabel());
 		this.labels.put("showControlPanelHolder", new JLabel());
 	}
 
@@ -223,28 +240,11 @@ public class View extends JFrame{
 		this.mandelbrotDisplay.setPreferredSize(new Dimension(1000, 625));
 	}
 
-	private void addShowButtonBehavior(){
-		this.mandelbrotDisplay.addMouseMotionListener(new MouseMotionListener(){
-			public void mouseMoved(MouseEvent e){
-				if ( View.this.controlPanel.isVisible() ) return;
-				Point p = View.this.mandelbrotDisplay.getMousePosition();
-				int panelWidth = View.this.mandelbrotDisplay.getWidth();
-				int panelHeight = View.this.mandelbrotDisplay.getHeight();
-				if ( panelWidth - 70 < p.getX() && panelHeight - 40 < p.getY() )
-					View.this.buttons.get("showControlPanel").setVisible(true);
-				else
-					View.this.buttons.get("showControlPanel").setVisible(false);
-			}
-			public void mouseDragged(MouseEvent e){}
-		});
-	}
-
 	private void buildMandelbrotDisplay(){
 		this.initMandelbrotDisplayAndPaintingBehavior();
 		this.addComponentsToMandelbrotDisplay();
 		this.alignBoundsLabels();
 		this.setUpShowControlPanelButton();
-		this.addShowButtonBehavior();
 		this.getContentPane().add(this.mandelbrotDisplay, BorderLayout.WEST);
 	}
 
@@ -252,6 +252,8 @@ public class View extends JFrame{
 		JPanel contPnl = new JPanel();
 		contPnl.setLayout(new GridLayout(0,2));
 		contPnl.setBorder(BorderFactory.createLineBorder(Color.BLACK));
+		contPnl.add(this.labels.get("area_in_view"));
+		contPnl.add(this.labels.get("area_in_view_value"));
 		contPnl.add(this.labels.get("z_real"));
 		contPnl.add(this.textFields.get("z_real"));
 		contPnl.add(this.labels.get("z_imag"));
