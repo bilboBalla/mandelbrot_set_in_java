@@ -25,6 +25,7 @@ import javax.swing.SwingWorker;
 import javax.swing.SwingUtilities;
 import javax.swing.JFrame;
 import javax.swing.JEditorPane;
+import javax.swing.JScrollPane;
 import java.io.FileNotFoundException;
 import java.nio.file.Files;
 import java.io.File;
@@ -199,7 +200,10 @@ public class Control{
 		}
 
 		JEditorPane jep = new JEditorPane("text/html", contentString);
-		aboutWindow.add(jep);
+		jep.setEditable(false);
+		JScrollPane scrollPane = new JScrollPane(jep);
+
+		aboutWindow.add(scrollPane);
 
 		aboutWindow.pack();
 		aboutWindow.setVisible(true);

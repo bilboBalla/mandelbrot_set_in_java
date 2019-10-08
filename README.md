@@ -9,3 +9,5 @@ To run this app simply download the MandelbrotSet.jar file and run it. You may n
 ### Prerequisites
 
 Java 9.0.4 or later
+
+![GitHub Logo](/examples/one.png)
