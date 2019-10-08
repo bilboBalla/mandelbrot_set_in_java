@@ -35,8 +35,6 @@ public class Control{
 	private View view;
 	private Model model;
 
-	private Point lastPressedPoint;
-
 	public Control(){
 		this.construct();
 	}
@@ -54,12 +52,8 @@ public class Control{
 				Control.this.mandelbrotDisplayWasClicked(e);
 			}
 			@Override public void mouseEntered(MouseEvent e){}
-			@Override public void mousePressed(MouseEvent e){
-				//Control.this.mousePressedInMandelbrotDisplay(e);
-			}
-			@Override public void mouseReleased(MouseEvent e){
-				//Control.this.mouseReleasedInMandelbrotDisplay(e);
-			}
+			@Override public void mousePressed(MouseEvent e){}
+			@Override public void mouseReleased(MouseEvent e){}
 			@Override public void mouseExited(MouseEvent e){}
 		});
 
@@ -67,9 +61,7 @@ public class Control{
 			@Override public void mouseMoved(MouseEvent e){
 				Control.this.mouseMovedInMandelbrotDisplay(e);
 			}
-			@Override public void mouseDragged(MouseEvent e){
-				Control.this.mouseDraggedInMandelbrotDisplay(e);
-			}
+			@Override public void mouseDragged(MouseEvent e){}
 		});
 
 		this.view.addActionToButton("bounds", new ActionListener(){
@@ -123,31 +115,6 @@ public class Control{
 		});
 	}
 
-	private void mousePressedInMandelbrotDisplay(MouseEvent e){
-		this.lastPressedPoint = e.getPoint();
-	}
-
-	private void mouseReleasedInMandelbrotDisplay(MouseEvent e){
-		int x_0 = this.lastPressedPoint.x;
-		int y_0 = this.lastPressedPoint.y;
-		int x_1 = e.getPoint().x;
-		if ( x_0 == x_1 ) return;
-
-		int left = (x_0 > x_1)?x_1:x_0;
-		int right = (x_0 > x_1)?x_0:x_1;
-		int width = right - left;
-		double height = width * 0.625;
-		int top = y_0 - (int)(height/2);
-		int bottom = y_0 + (int)(height/2);
-
-		this.areaSelected(
-			this.model.mapYToImag(top),
-			this.model.mapYToImag(bottom),
-			this.model.mapXToReal(left),
-			this.model.mapXToReal(right)
-		);
-	}
-
 	private void enterKeyPressed(KeyEvent e){
 		if ( e.getKeyCode() == KeyEvent.VK_ENTER )
 					Control.this.zoomButtonClicked();
@@ -156,10 +123,6 @@ public class Control{
 	// For finding the show button when control panel is hidden
 	private void mouseMovedInMandelbrotDisplay(MouseEvent e){
 		this.view.mouseMovedInMandelbrotDisplay(e);
-	}
-
-	private void mouseDraggedInMandelbrotDisplay(MouseEvent e){
-		//System.out.println(e.getPoint());
 	}
 
 	private void mandelbrotDisplayWasClicked(MouseEvent e){
@@ -222,9 +185,6 @@ public class Control{
 		aboutWindow.setTitle("About");
 		aboutWindow.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		aboutWindow.setPreferredSize(new Dimension(600, 600));
-		
-
-
 
 		String contentString = "";
 
@@ -240,8 +200,6 @@ public class Control{
 
 		JEditorPane jep = new JEditorPane("text/html", contentString);
 		aboutWindow.add(jep);
-
-
 
 		aboutWindow.pack();
 		aboutWindow.setVisible(true);
