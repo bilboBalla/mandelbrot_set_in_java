@@ -31,6 +31,7 @@ import java.util.HashMap;
 public class View extends JFrame{
 	
 	private boolean boundsAreVisible;
+	private HashMap<String, Double> settings;
 	private BufferedImage mandelbrotImage;
 	private JPanel mandelbrotDisplay;
 	private JPanel controlPanel;
@@ -110,8 +111,9 @@ public class View extends JFrame{
 	}
 
 
-	public View(){
+	public View(HashMap<String, Double> settings){
 		super();
+		this.settings = settings;
 		this.construct();
 	}
 
@@ -237,7 +239,12 @@ public class View extends JFrame{
 		};
 		this.mandelbrotDisplay.setLayout(new GridLayout(3, 3));
 		this.mandelbrotDisplay.setBorder(BorderFactory.createLineBorder(Color.BLACK));
-		this.mandelbrotDisplay.setPreferredSize(new Dimension(1000, 625));
+		this.mandelbrotDisplay.setPreferredSize(
+			new Dimension(
+				(int)this.settings.get("width").doubleValue(), 
+				(int)this.settings.get("height").doubleValue()
+			)
+		);
 	}
 
 	private void buildMandelbrotDisplay(){

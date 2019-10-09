@@ -16,6 +16,7 @@ import java.awt.Graphics;
 public class Model{
 
 	public View view;
+	private HashMap<String, Double> settings;
 
 	// Algorithm Context
 	public double zReal;
@@ -153,7 +154,8 @@ public class Model{
 
 	public Model(View view, HashMap<String, Double> settings){
 		this.view = view;
-		this.construct(settings);
+		this.settings = settings;
+		this.construct();
 	}
 
 	public double realWidth(){
@@ -173,26 +175,26 @@ public class Model{
 		return this.imagHeight() / (this.height-1);
 	}
 
-	private void construct(HashMap<String, Double> settings){
-		this.zReal          = settings.get("zReal");
-		this.zImag          = settings.get("zImag");
-		this.magnitudeCap   = settings.get("magnitudeCap");
-		this.iterationCap   = (int)settings.get("iterationCap").doubleValue();
-		this.threadCount    = (int)settings.get("threadCount").doubleValue();
-		this.zoomFactor     = settings.get("zoomFactor");
-		this.zoomAboutReal  = settings.get("zoomAboutReal");
-		this.zoomAboutImag  = settings.get("zoomAboutImag");
-		this.hueMultiplier  = settings.get("hueMultiplier").floatValue();
-		this.hueAdder       = settings.get("hueAdder").floatValue();
-		this.saturation     = settings.get("saturation").floatValue();
-		this.brightness     = settings.get("brightness").floatValue();
-		this.width          = (int)settings.get("width").doubleValue();
-		this.height         = (int)settings.get("height").doubleValue();
+	private void construct(){
+		this.zReal          = this.settings.get("zReal");
+		this.zImag          = this.settings.get("zImag");
+		this.magnitudeCap   = this.settings.get("magnitudeCap");
+		this.iterationCap   = (int)this.settings.get("iterationCap").doubleValue();
+		this.threadCount    = (int)this.settings.get("threadCount").doubleValue();
+		this.zoomFactor     = this.settings.get("zoomFactor");
+		this.zoomAboutReal  = this.settings.get("zoomAboutReal");
+		this.zoomAboutImag  = this.settings.get("zoomAboutImag");
+		this.hueMultiplier  = this.settings.get("hueMultiplier").floatValue();
+		this.hueAdder       = this.settings.get("hueAdder").floatValue();
+		this.saturation     = this.settings.get("saturation").floatValue();
+		this.brightness     = this.settings.get("brightness").floatValue();
+		this.width          = (int)this.settings.get("width").doubleValue();
+		this.height         = (int)this.settings.get("height").doubleValue();
 		this.pushToNextImage(
-			settings.get("top"),
-			settings.get("bottom"), 
-			settings.get("left"), 
-			settings.get("right")
+			this.settings.get("top"),
+			this.settings.get("bottom"), 
+			this.settings.get("left"), 
+			this.settings.get("right")
 		);
 	}
 

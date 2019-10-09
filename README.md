@@ -4,11 +4,11 @@ This project is a lightweight desktop app for exploring the Mandelbrot Set.
 
 ## Getting Started
 
-To run this app simply download the MandelbrotSet.jar file and run it. You may need to update the version of java you are running, I built it with jdk 9.0.4. alternatively you can clone the repo and run the test script from a terminal or command promt.
+To run this app simply download the MandelbrotSet.jar file and run it. You may need to update the version of java you are running, I built it with jdk 12.0.2. alternatively you can clone the repo and run the test script from a terminal or command promt.
 
 ### Prerequisites
 
-Java 9.0.4 or later
+Java 12.0.2 or later
 
 ### Some examples of images generated from the Mandelbrot Set Explorer
 ![example zero](/view/about/start.png)

@@ -43,7 +43,7 @@ public class Control{
 
 	private void construct(){
 		HashMap<String, Double> settings = this.loadSettings();
-		this.view = new View();
+		this.view = new View(settings);
 		this.model = new Model(this.view, settings);
 		this.updateView();
 		this.addEventHandlers();
