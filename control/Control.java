@@ -6,6 +6,9 @@ import model.*;
 import java.util.List;
 import java.util.Scanner;
 import java.util.HashMap;
+import java.io.InputStream;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
 import java.text.DecimalFormat;
 import java.awt.Point;
 import java.awt.Dimension;
@@ -30,6 +33,7 @@ import javax.swing.JScrollPane;
 import java.io.FileNotFoundException;
 import java.nio.file.Files;
 import java.io.File;
+import java.net.URL;
 
 
 public class Control{
@@ -51,16 +55,16 @@ public class Control{
 
 	private HashMap<String, Double> loadSettings(){
 		HashMap<String, Double> settings = new HashMap<String, Double>();
-		try {
-			File settingsFile = new File("./defaultSettings.txt");
-			Scanner scanner = new Scanner(settingsFile);
-			while ( scanner.hasNextLine() ){
-				String nl = scanner.nextLine();
-				String field = nl.split(" ")[0];
-				String value = nl.split(" ")[1];
+		try{
+			InputStream in = getClass().getResourceAsStream("/defaultSettings.txt"); 
+			BufferedReader reader = new BufferedReader(new InputStreamReader(in));
+			String nextLine;
+			while ( ( nextLine = reader.readLine() ) != null ){
+				String field = nextLine.split(" ")[0];
+				String value = nextLine.split(" ")[1];
 				settings.put(field, Double.parseDouble(value));
 			}
-		}catch( FileNotFoundException e){}
+		}catch(IOException e){}
 		return settings;
 	}
 
@@ -206,29 +210,48 @@ public class Control{
 		aboutWindow.setPreferredSize(new Dimension(630, 600));
 
 		String contentString = "";
-
-		try {
-			File content = new File("./view/about/about.html");
-			Scanner scanner = new Scanner(content);
-			while ( scanner.hasNextLine() ){
-				contentString += scanner.nextLine()+"\n";
+		try{
+			InputStream in = getClass().getResourceAsStream("/view/about/about.html"); 
+			BufferedReader reader = new BufferedReader(new InputStreamReader(in));
+			String nextLine;
+			while ( ( nextLine = reader.readLine() ) != null ){
+				
+				if ( nextLine.trim().equals("<!--insert_images_here-->".trim())){
+					System.out.println(nextLine);
+					contentString += this.createImageHTML();
+				}else{
+					contentString += nextLine;
+				}
 			}
-		}catch( FileNotFoundException e){
-			contentString = "oops, couldn't find file";
-		}
+		}catch(IOException e){}
 
-		//String source = Control.class.getClassLoader().getSystemResource("small.png").toString();
-		//System.out.println(source);
 		JEditorPane jep = new JEditorPane("text/html", contentString);
 		jep.setEditable(false);
 		JScrollPane scrollPane = new JScrollPane(jep);
 		jep.setCaretPosition(0);
-
 		aboutWindow.add(scrollPane);
-
 		aboutWindow.setResizable(false);
 		aboutWindow.pack();
 		aboutWindow.setVisible(true);
+	}
+
+	/*
+		execution from jar file requires that resources be accessed like this
+		go figure. Otherwise I would have had all this hard coded into about.html.
+		This was the quickest work around to putting images in the about page, even
+		though it totally breaks the separation of concerns princpal. oh well.
+	*/
+	private String createImageHTML(){
+		URL url0 = getClass().getResource("/view/about/start.png");
+		URL url1 = getClass().getResource("/view/about/one.png");
+		URL url2 = getClass().getResource("/view/about/two.png");
+		URL url3 = getClass().getResource("/view/about/three.png");
+		return (
+			"<img src=" + url0 + " width=600 height=375></img><br/>" +
+			"<img src=" + url1 + " width=600 height=375></img><br/>" +
+			"<img src=" + url2 + " width=600 height=375></img><br/>" +
+			"<img src=" + url3 + " width=600 height=375></img><br/>"
+		);
 	}
 
 	private void hideButtonWasClicked(){

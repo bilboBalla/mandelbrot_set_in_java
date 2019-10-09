@@ -5,8 +5,8 @@ javac Main.java
 printf "Main-Class: Main" >> manifest.txt
 printf "\n" >> manifest.txt
 
-jar -cvmf manifest.txt MandelbrotSet.jar *.class view/*.class view/about/* model/*.class control/*.class
+jar -cvmf manifest.txt MandelbrotSet.jar *.class view/*.class view/about/* model/*.class control/*.class defaultSettings.txt
 
 rm manifest.txt
-rm -f *.class 
+rm -f *.class
 rm -rf */*.class
