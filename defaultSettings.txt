@@ -1,14 +1,14 @@
 zReal 0
 zImag 0
 magnitudeCap 2
-iterationCap 100
+iterationCap 1000
 threadCount 100
 zoomFactor 0.5
 zoomAboutReal 0
 zoomAboutImag 0
 hueMultiplier 1
 hueAdder 0.0
-saturation -0.6
+saturation 0.6
 brightness 1.0
 width 1000
 height 625
