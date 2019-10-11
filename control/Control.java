@@ -196,19 +196,23 @@ public class Control{
 		this.updateView();
 	}
 
-	private void areaSelected(double top, double bottom, double left, double right){
-		if ( this.model.isWorking() ) return;
-		if ( ! this.updateModel() ) return;
-		this.model.zoom(top,bottom, left, right);
-		this.updateView();
-	}
-
 	private void aboutButtonWasClicked(){
 		JFrame aboutWindow = new JFrame();
 		aboutWindow.setTitle("About");
 		aboutWindow.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		aboutWindow.setPreferredSize(new Dimension(630, 600));
+		String content = this.aboutPageContent();
+		JEditorPane jep = new JEditorPane("text/html", content);
+		jep.setEditable(false);
+		JScrollPane scrollPane = new JScrollPane(jep);
+		jep.setCaretPosition(0);
+		aboutWindow.add(scrollPane);
+		aboutWindow.setResizable(false);
+		aboutWindow.pack();
+		aboutWindow.setVisible(true);
+	}
 
+	private String aboutPageContent(){
 		String contentString = "";
 		try{
 			InputStream in = getClass().getResourceAsStream("/view/about/about.html"); 
@@ -223,15 +227,7 @@ public class Control{
 				}
 			}
 		}catch(IOException e){}
-
-		JEditorPane jep = new JEditorPane("text/html", contentString);
-		jep.setEditable(false);
-		JScrollPane scrollPane = new JScrollPane(jep);
-		jep.setCaretPosition(0);
-		aboutWindow.add(scrollPane);
-		aboutWindow.setResizable(false);
-		aboutWindow.pack();
-		aboutWindow.setVisible(true);
+		return contentString;
 	}
 
 	/*
