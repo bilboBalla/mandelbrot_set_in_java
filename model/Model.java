@@ -300,7 +300,7 @@ public class Model{
 				this.brightness
 			)
 		);
-	}//
+	}
 
 	private Color mandelbrotAlgorithm(double real, double imag){
 		double zR = this.zReal;
