@@ -219,7 +219,7 @@ public class Control{
 				if ( nextLine.trim().equals("<!--insert_images_here-->".trim())){
 					contentString += this.createImageHTML();
 				}else{
-					contentString += nextLine;
+					contentString += nextLine; 
 				}
 			}
 		}catch(IOException e){}
