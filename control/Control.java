@@ -217,7 +217,6 @@ public class Control{
 			while ( ( nextLine = reader.readLine() ) != null ){
 				
 				if ( nextLine.trim().equals("<!--insert_images_here-->".trim())){
-					System.out.println(nextLine);
 					contentString += this.createImageHTML();
 				}else{
 					contentString += nextLine;
