@@ -3,36 +3,48 @@
 	
 		<p><h1>About This Software</h1>This program is a small and simple Mandelbrot Set viewer. It is my first go at a desktop app built in java. I hope you enjoy it! If you want to check out the github repo this is the link : https://github.com/townesean/mandelbrot_set_in_java.</p><br/>
 		
-		
+		<hr>
+
 		<p><h2>How To Use This Software</h2>Click on a point in the image and hit the enter key! Or double click on any point. Right click to zoom back out or hit the back button. For more specifics see below for the meaning and uses of the fields listed on the right of the application.</p><br/>
+
+		<hr>
 
 		<p><h3>Area In View</h3>The area in view field simply tells you the surface area of the section of the complex plane being shown. It is equal to the real width of the image multiplied by the imaginary height of the image.</p><br/>
 
-		
+		<hr>
+
 		<p><h3>Z Real & Z Imag</h3>These fields are the Z values in the recursive equation that computes the Mandelbrot Set. Z = Z^2 + C. Normally the value of Z would be set to Z = 0i + 0r, but if you tweek those values you could get some interesting results.</p><br/>
 
+		<hr>
 		
 		<p><h3>Mag. Cap (Magnitude Cap)</h3>When determining if a number is in the mandelbrot set, if the magnitude of Z exceeds the Magnitude Cap field, the point being tested is considered not to be in the set. For interesting results try values between 0 and 2.</p><br/>
 
-		
+		<hr>
+
 		<p><h3>Itr. Cap (Iteration Cap)</h3>When determining if a number is in the mandelbrot set, the value Z from Z = Z^2 + C is computed many times. The number of times Z is computed is determined by the value in Itr. Cap. Changing the iteration cap affects the fidelity or accuraccy of the image. The higher the iteration cap the more accurate the image will be. A higher iteration cap also means longer computation time.</p><br/>
 
+		<hr>
 		
 		<p><h3>Thread Count</h3>Computing the mandelbrot set is computationaly expensive. The thread count field sets the number of threads used each time the image is computed. Because of the janky way I programed this app, each thread can be seen doing its work as a black bar going down the screen. If you are using a modern computer with multiple cores, setting the thread count high can dramaticly reduce the computation time.</p><br/>
 
+		<hr>
 
 		<p><h3>Zoom Factor</h3>Think of the zoom factor as a coefficient to the area in view. If the value of zoom factor is between zero and one, the image will zoom in, if it is greater than one, it will zoom out. If the value is negative it will actually flip the image. Set zoom factor equal to one if you dont want to move around the space without zooming in.</p><br/>
 
-		
+		<hr>
+
 		<p><h3>Zoom About R & I</h3>The zoom about R & I fields are simply the complex coordinants of the next point to be zoomed in on. You can set these by clicking on a point in the image or you can set them manually by typing in values for them. Whatever coordinants are in these fields when a zoom is initiated will be at the center of the image when the zoom is complete. </p><br/>
 
-		
+		<hr>
+
 		<p><h3>Color Settings</h3>Check out how HSV color space works. The saturation and brightness fields for each pixel are whatever are specified by the user. The hue parameter is a number derived from the escape iteration of the pixel, multiplied by the hue multiplier field and added to the hue adder field. Try making the saturation and brightness fields really big, or really negative. The hue adder field works best as a fractional number ;)</p><br/>
 
-		
-		<p><h3>Buttons</h3>The zoom button zooms, same behavior as the enter key or double click. The back button takes you to the last generated image. The save image button will open a window to prompt you to save the current image, be carefull the directory it opens to is your user home. The bounds button will toggle the visibility of the numbers at the edge of the image. Those numbers tell you the complex bounds of the image. You have already cleverly discovered the functionality of the about button ;). The hide button hides the settings on the left of the app so that you can focus on the mandelbrot image. If the settings are hidden and you want them back, move your mouse to the bottom right of the image.</p><br/>
+		<hr>
 
+		<p><h3>Buttons</h3>The zoom button zooms, same behavior as the enter key or double click. The back button takes you to the last generated image. The save image button will open a window to prompt you to save the current image, be carefull the directory it opens to is your user home. The bounds button will toggle the visibility of the numbers at the edge of the image. Those numbers tell you the complex bounds of the image. You have already cleverly discovered the functionality of the about button ;). The hide button hides the settings on the left of the app so that you can focus on the mandelbrot image. If the settings are hidden and you want them back, move your mouse to the bottom right of the image.</p><br/>
 		<br/>
+
+		<hr>
 
 		<h3>Here are some examples of pictures taken in the app</h3>
 		<!--insert_images_here-->
